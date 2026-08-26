@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Investimentos — Flip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F5F1;
+  --panel:#FFFFFF;
+  --ink:#16232E;
+  --ink-soft:#54626D;
+  --line:#D8DCD3;
+  --line-soft:#E7E9E2;
+  --accent:#0E5C52;
+  --accent-soft:#DCEAE6;
+  --good:#1E7A3D;
+  --good-bg:#E4F3E7;
+  --warn:#9A6B0A;
+  --warn-bg:#FBF0DA;
+  --bad:#B23A2E;
+  --bad-bg:#FBE7E3;
+  --radius:10px;
+  font-family:'Inter',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+body{padding:0 0 80px;}
+h1,h2,h3{font-family:'Source Serif 4',serif;font-weight:600;margin:0;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit;cursor:pointer;}
+
+/* header */
+header.app{padding:28px 32px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:relative;}
+.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;}
+.brand .mark{width:30px;height:30px;border:1.5px solid var(--ink);border-radius:3px;position:relative;flex-shrink:0;}
+.brand .mark::before{content:'';position:absolute;left:6px;right:6px;top:9px;height:1px;background:var(--ink);}
+.brand .mark::after{content:'';position:absolute;left:6px;right:6px;top:14px;height:1px;background:var(--ink);}
+.brand h1{font-size:19px;letter-spacing:.01em;}
+.brand .sub{font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:.03em;}
+nav.tabs{display:flex;gap:4px;}
+nav.tabs button{background:none;border:1px solid transparent;padding:9px 16px;font-size:13.5px;font-weight:500;color:var(--ink-soft);border-radius:7px 7px 0 0;}
+nav.tabs button.active{color:var(--ink);border-color:var(--line) var(--line) var(--panel);background:var(--bg);}
+
+main{max-width:1080px;margin:0 auto;padding:28px 32px;}
+section.view{display:none;}
+section.view.active{display:block;}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.toolbar h2{font-size:22px;}
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 18px;border-radius:7px;font-size:13.5px;font-weight:500;}
+.btn.ghost{background:none;color:var(--ink);}
+.btn.subtle{border-color:var(--line);background:var(--panel);color:var(--ink-soft);}
+.btn.danger{border-color:var(--bad);color:var(--bad);background:none;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* card list */
+.card-list{display:flex;flex-direction:column;gap:10px;}
+.item-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s;}
+.item-card:hover{border-color:var(--accent);}
+.item-card .main{min-width:0;}
+.item-card .name{font-weight:600;font-size:15px;margin-bottom:3px;}
+.item-card .meta{font-size:12.5px;color:var(--ink-soft);}
+.item-card .right{display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.item-card .tir{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:500;}
+.badge{font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:.02em;white-space:nowrap;}
+.badge.analise{background:var(--warn-bg);color:var(--warn);}
+.badge.fechado{background:var(--accent-soft);color:var(--accent);}
+.badge.descartado{background:var(--line-soft);color:var(--ink-soft);}
+.empty-state{border:1px dashed var(--line);border-radius:var(--radius);padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
+
+/* form */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+.form-grid .span2{grid-column:1/-1;}
+label.field{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;}
+input[type=text],input[type=number]{width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);}
+input[type=text]{font-family:'Inter',sans-serif;}
+input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+.derived{font-size:12.5px;color:var(--ink-soft);margin-top:5px;}
+.derived b{color:var(--ink);font-family:'IBM Plex Mono',monospace;}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+/* matrix */
+.matrix-wrap{margin-top:8px;}
+.fin-toggles{display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap;}
+.fin-toggle label{font-size:12.5px;color:var(--ink-soft);font-weight:500;display:block;margin-bottom:6px;}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;}
+.seg button{border:none;background:var(--panel);padding:7px 14px;font-size:12.5px;color:var(--ink-soft);}
+.seg button.on{background:var(--ink);color:#fff;}
+table.tir-matrix{border-collapse:collapse;width:100%;}
+table.tir-matrix th,table.tir-matrix td{border:1px solid var(--line);padding:0;text-align:center;}
+table.tir-matrix th{background:var(--bg);font-size:11.5px;font-weight:600;color:var(--ink-soft);padding:9px 6px;text-transform:uppercase;letter-spacing:.03em;}
+table.tir-matrix th.corner{background:var(--panel);border:none;}
+table.tir-matrix td .cell{padding:16px 6px;font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;}
+table.tir-matrix td.good .cell{background:var(--good-bg);color:var(--good);}
+table.tir-matrix td.warn .cell{background:var(--warn-bg);color:var(--warn);}
+table.tir-matrix td.bad .cell{background:var(--bad-bg);color:var(--bad);}
+table.tir-matrix td.base{position:relative;}
+table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;left:0;right:0;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;opacity:.55;font-family:'Inter',sans-serif;}
+.legend-row{display:flex;gap:16px;margin-top:14px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap;}
+.legend-row .sw{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px;}
+.threshold-note{font-size:12px;color:var(--ink-soft);margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+
+.decision-row{display:flex;gap:12px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line);align-items:center;flex-wrap:wrap;}
+.decision-row .q{font-size:14px;font-weight:500;margin-right:auto;}
+
+/* investimento detail */
+.phase-block{margin-bottom:26px;}
+.phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.phase-head h3{font-size:15px;}
+.entry-table{display:grid;grid-template-columns:minmax(160px,1fr) 148px 148px 30px;row-gap:3px;column-gap:12px;align-items:center;}
+.entry-table .e-label{font-size:12px;color:var(--ink-soft);padding:5px 0;}
+.entry-table input[type=date]{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);width:100%;}
+.entry-table input.money-mask{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
+.entry-table input.e-desc{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
+.entry-table .e-empty{visibility:hidden;}
+.entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
+.despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:8px;border:1px dashed var(--line);}
+.despesas-block .desp-hdr{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
+.despesas-block .entry-table{grid-template-columns:minmax(140px,1fr) 140px 130px 26px;}
+.phase-collapse-btn{border:1px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:6px;font-size:11.5px;color:var(--ink-soft);}
+.phase-block.collapsed .phase-body{display:none;}
+@media (max-width:720px){ .entry-table, .despesas-block .entry-table{grid-template-columns:1fr 1fr 1fr 24px;} }
+.compare-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+.compare-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+.compare-card .lbl{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+.compare-card .tir{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;}
+.compare-card.present{border-color:var(--accent);}
+.back-link{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;display:inline-block;}
+.back-link:hover{color:var(--ink);}
+
+@media (max-width:640px){
+  .form-grid{grid-template-columns:1fr;}
+  .compare-cards{grid-template-columns:1fr;}
+  header.app,main{padding-left:16px;padding-right:16px;}
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:32px;max-width:360px;width:100%;">
+    <div class="brand" style="margin-bottom:22px;">
+      <span class="mark"></span>
+      <h1 style="font-size:19px;">Painel de Investimentos</h1>
+    </div>
+    <label class="field">E-mail</label>
+    <input type="text" id="login-email" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px;margin-bottom:14px;background:var(--bg);color:var(--ink);">
+    <label class="field">Senha</label>
+    <input type="password" id="login-password" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px;margin-bottom:8px;background:var(--bg);color:var(--ink);">
+    <p id="login-error" style="color:var(--bad);font-size:12.5px;min-height:16px;margin:0 0 10px;"></p>
+    <button class="btn" id="btn-login" style="width:100%;margin-bottom:10px;">Entrar</button>
+    <button class="btn ghost" id="btn-login-reset" style="width:100%;font-size:12px;">Esqueci minha senha</button>
+  </div>
+</div>
+
+<div id="app-shell" hidden>
+
+<header class="app">
+  <div class="brand">
+    <span class="mark"></span>
+    <h1>Painel de Investimentos</h1>
+    <span class="sub">FLIP · TIR</span>
+  </div>
+  <button class="btn ghost" id="btn-logout" style="position:absolute;top:28px;right:32px;font-size:12px;">Sair (<span id="user-email-label"></span>)</button>
+  <nav class="tabs">
+    <button data-tab="estudos" class="active">Estudos de viabilidade</button>
+    <button data-tab="investimentos">Investimentos realizados</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ===================== TAB ESTUDOS ===================== -->
+  <section id="tab-estudos" class="view active">
+
+    <div id="estudos-home">
+      <div class="toolbar">
+        <h2>Estudos de viabilidade</h2>
+        <button class="btn" id="btn-novo-estudo">+ Novo estudo</button>
+      </div>
+      <div id="estudos-list" class="card-list"></div>
+    </div>
+
+    <div id="estudo-form-panel" class="panel" hidden>
+      <h3 style="margin-bottom:18px;font-size:17px;">Novo estudo de viabilidade</h3>
+      <div class="form-grid">
+        <div class="span2">
+          <label class="field">Nome ou referência</label>
+          <input type="text" id="f-nome" placeholder="Ex: Ap. Rua Palmeiras, 340">
+        </div>
+        <div class="span2">
+          <label class="field">Endereço</label>
+          <input type="text" id="f-endereco" placeholder="Rua, número, bairro">
+        </div>
+        <div>
+          <label class="field">Data de fechamento do negócio (prevista) <span style="font-weight:400">— data zero do caixa</span></label>
+          <input type="date" id="f-fechamento">
+        </div>
+        <div>
+          <label class="field">Metragem (m²)</label>
+          <input type="text" inputmode="decimal" id="f-metragem" placeholder="85">
+        </div>
+        <div>
+          <label class="field">Valor estimado de compra (R$)</label>
+          <input type="text" inputmode="decimal" id="f-compra" placeholder="350.000">
+        </div>
+        <div>
+          <label class="field">Custo de reforma por m² (R$)</label>
+          <input type="text" inputmode="decimal" id="f-reforma-m2" placeholder="2.750">
+          <div class="derived">Total estimado: <b id="f-reforma-total">R$ 0</b></div>
+        </div>
+        <div>
+          <label class="field">Condomínio mensal (R$)</label>
+          <input type="text" inputmode="decimal" id="f-condominio" placeholder="1.000">
+        </div>
+        <div>
+          <label class="field">Valor estimado de venda (R$)</label>
+          <input type="text" inputmode="decimal" id="f-venda" placeholder="850.000">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn ghost" id="btn-cancelar-estudo">Cancelar</button>
+        <button class="btn" id="btn-calcular-estudo">Calcular cenários</button>
+      </div>
+    </div>
+
+    <div id="estudo-result-panel" hidden>
+      <button class="back-link" id="btn-voltar-lista">&larr; Voltar aos estudos</button>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <h3 id="result-nome" style="font-size:18px;margin-bottom:2px;"></h3>
+            <p id="result-endereco" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 20px;"></p>
+          </div>
+          <button class="btn subtle" id="btn-editar-estudo" style="flex-shrink:0;">Editar dados</button>
+        </div>
+
+        <div class="panel" style="padding:16px 18px;margin-bottom:16px;background:var(--bg);">
+          <label class="field" style="margin-bottom:10px;">Valores para esta simulação <span style="font-weight:400">— ajuste cada um e veja o efeito na TIR dos 3 cenários de prazo, à direita</span></label>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:0;">
+            <div>
+              <label class="field">Valor de compra (R$)</label>
+              <input type="text" inputmode="decimal" id="matrix-compra" class="money-mask">
+            </div>
+            <div>
+              <label class="field">Custo de reforma total (R$)</label>
+              <input type="text" inputmode="decimal" id="matrix-reforma" class="money-mask">
+            </div>
+            <div>
+              <label class="field">Valor de venda (R$)</label>
+              <input type="text" inputmode="decimal" id="matrix-venda" class="money-mask">
+            </div>
+          </div>
+        </div>
+
+        <div class="fin-toggles">
+          <div class="fin-toggle">
+            <label>Financiamento inicial (compra)</label>
+            <div class="seg" id="seg-fin-inicial">
+              <button data-v="0">Não</button>
+              <button data-v="1">Sim</button>
+            </div>
+          </div>
+          <div class="fin-toggle">
+            <label>Financiamento final (venda)</label>
+            <div class="seg" id="seg-fin-final">
+              <button data-v="0">Não</button>
+              <button data-v="1">Sim</button>
+            </div>
+          </div>
+        </div>
+
+        <table class="tir-matrix" id="tir-matrix">
+          <thead>
+            <tr><th>Plus</th><th>Default</th><th>Minus</th></tr>
+          </thead>
+          <tbody id="tir-matrix-body"></tbody>
+        </table>
+
+        <div class="legend-row">
+          <span><span class="sw" style="background:var(--good-bg);border:1px solid var(--good)"></span>TIR ≥ 25% — aprovar</span>
+          <span><span class="sw" style="background:var(--warn-bg);border:1px solid var(--warn)"></span>22–25% — analisar com cautela</span>
+          <span><span class="sw" style="background:var(--bad-bg);border:1px solid var(--bad)"></span>&lt; 22% — recusar</span>
+        </div>
+        <p class="threshold-note">Plus = prazo mais curto em todas as fases. Minus = prazo mais longo. Default é o cenário de referência. Os valores de compra, reforma e venda são fixos nos 3 cenários — ajuste-os nos campos acima para simular negociação.</p>
+
+        <div class="decision-row">
+          <span class="q">Negócio fechado?</span>
+          <button class="btn subtle" id="btn-nao-fechado">Ainda não — aguardar</button>
+          <button class="btn" id="btn-sim-fechado">Sim, negócio fechado</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== TAB INVESTIMENTOS ===================== -->
+  <section id="tab-investimentos" class="view">
+
+    <div id="investimentos-home">
+      <div class="toolbar">
+        <h2>Investimentos realizados</h2>
+      </div>
+      <div id="investimentos-list" class="card-list"></div>
+    </div>
+
+    <div id="investimento-detail" hidden>
+      <button class="back-link" id="btn-voltar-investimentos">&larr; Voltar aos investimentos</button>
+      <div class="panel">
+        <h3 id="inv-nome" style="font-size:18px;margin-bottom:2px;"></h3>
+        <p id="inv-endereco" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 22px;"></p>
+
+        <div class="compare-cards">
+          <div class="compare-card">
+            <div class="lbl">TIR situação default (100% projetada, a partir da data de fechamento prevista)</div>
+            <div class="tir" id="inv-tir-default">–</div>
+          </div>
+          <div class="compare-card present">
+            <div class="lbl">TIR situação presente (mescla dados reais lançados + projeção do restante)</div>
+            <div class="tir" id="inv-tir-presente">–</div>
+          </div>
+        </div>
+
+        <button class="btn subtle" id="btn-toggle-cronograma" style="margin-bottom:22px;">Abrir cronograma previsto (default) em nova janela</button>
+
+        <div id="inv-phases"></div>
+      </div>
+    </div>
+
+  </section>
+</main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDN7zbQQO-Xzpekq1mkLcyi2vE-1ERr5aw",
+  authDomain: "fliapp-7d844.firebaseapp.com",
+  projectId: "fliapp-7d844",
+  storageBucket: "fliapp-7d844.firebasestorage.app",
+  messagingSenderId: "997735636351",
+  appId: "1:997735636351:web:f65e0a443e7f76b9d4ce4a",
+  measurementId: "G-3ZZ35NR5VD"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+</script>
+<script>
+/* ============================================================
+   DADOS BASE — prazos (dias) e ajustes de valor por cenário
+   Índices: 0=plus  1=default  2=minus
+   ============================================================ */
+const PRAZOS = {
+  compra_sem: { procurar:[15,30,45], aceite_sinal:[10,15,20], parc2_chaves:[10,15,30] },
+  compra_com: { procurar:[15,30,45], aceite_sinal:[10,15,20], parc2_assinatura:[20,60,75], financ_chaves:[10,15,20] },
+  reforma:    { projeto:[20,30,40], obra:[120,150,180] },
+  venda_sem:  { fim_reforma_ini_venda:[0,10,15], ini_venda_aceite:[30,60,90], ccv_sinal:[10,15,20], parc2_chaves:[10,15,30] },
+  venda_com:  { fim_reforma_ini_venda:[0,10,15], ini_venda_aceite:[30,60,90], ccv_sinal:[10,15,20], parc2_financ:[20,60,75], financ_chaves:[10,15,20] }
+};
+const CONST = { itbiPct:0.04, custoVendaPct:0.135 };
+const SCEN = ['plus','default','minus'];
+
+function xirr(cfs){
+  let rate = 0.3;
+  for(let it=0; it<200; it++){
+    let f=0, df=0;
+    cfs.forEach(c=>{ const t=c.days/365; f += c.amt/Math.pow(1+rate,t); df += -t*c.amt/Math.pow(1+rate,t+1); });
+    const nr = rate - f/df;
+    if(Math.abs(nr-rate) < 1e-8){ rate = nr; break; }
+    rate = nr;
+  }
+  return rate;
+}
+
+/**
+ * Calcula a TIR "sob demanda" (cada aporte só ocorre na data em que é necessário).
+ * days: objeto com os dias reais/escolhidos de cada sub-etapa (já resolvido, não índice de cenário)
+ * vals: {compraVal, reformaVal, vendaVal, condominio}
+ * financInicial/financFinal: bool
+ */
+function calcTIR(days, vals, financInicial, financFinal){
+  const compra = vals.compraVal, venda = vals.vendaVal, reforma = vals.reformaVal;
+  if(!(compra>0) || !(venda>0)){
+    return { tir: NaN, totalDays:0, chavesCompra:0, chavesVenda:0, fimObra:0 };
+  }
+  const itbi = compra*CONST.itbiPct;
+
+  const t1 = days.procurar;
+  const t2 = t1+days.aceite_sinal;
+  let chavesCompra, outflows=[];
+  outflows.push([t2, compra*0.10+itbi]);
+  if(!financInicial){
+    const t3=t2+days.parc2_chaves; chavesCompra=t3;
+    outflows.push([t3, compra*0.90]);
+  } else {
+    const t3a=t2+days.parc2_assinatura, t3b=t3a+days.financ_chaves; chavesCompra=t3b;
+    outflows.push([t3a, compra*0.20]);
+    outflows.push([t3b, compra*0.70]);
+  }
+  const t4 = chavesCompra+days.projeto;
+  const t5 = t4+days.obra;
+  const nParc = Math.max(1, Math.round(days.obra/20));
+  for(let i=0;i<nParc;i++){ outflows.push([t4+Math.round((i+1)*days.obra/nParc), reforma/nParc]); }
+
+  const t6 = t5+days.fim_reforma_ini_venda;
+  const t7 = t6+days.ini_venda_aceite;
+  const t8 = t7+days.ccv_sinal;
+  let chavesVenda, inflows=[];
+  inflows.push([t8, venda*0.10, false]);
+  if(!financFinal){
+    const t9=t8+days.parc2_chaves_v; chavesVenda=t9;
+    inflows.push([t9, venda*0.90, true]);
+  } else {
+    const t9a=t8+days.parc2_financ, t9b=t9a+days.financ_chaves_v; chavesVenda=t9b;
+    inflows.push([t9a, venda*0.20, false]);
+    inflows.push([t9b, venda*0.70, true]);
+  }
+  let d=chavesCompra;
+  while(d<chavesVenda){ d+=30; if(d>chavesVenda)d=chavesVenda; outflows.push([d, vals.condominio]); }
+
+  const cfs=[];
+  outflows.forEach(([day,amt])=>cfs.push({days:day, amt:-amt}));
+  inflows.forEach(([day,amt,isLast])=>{
+    let v=amt; if(isLast) v -= venda*CONST.custoVendaPct;
+    cfs.push({days:day, amt:v});
+  });
+  const totalDays = Math.max(...inflows.map(x=>x[0]));
+  return { tir: xirr(cfs), totalDays, chavesCompra, chavesVenda, fimObra:t5 };
+}
+
+/** monta o objeto `days` a partir de um índice de cenário (0/1/2) e flags de financiamento */
+function daysForScenario(scenIdx, financInicial, financFinal){
+  const c = financInicial ? PRAZOS.compra_com : PRAZOS.compra_sem;
+  const v = financFinal ? PRAZOS.venda_com : PRAZOS.venda_sem;
+  const r = PRAZOS.reforma;
+  const d = {};
+  d.procurar = c.procurar[scenIdx]; d.aceite_sinal = c.aceite_sinal[scenIdx];
+  if(financInicial){ d.parc2_assinatura=c.parc2_assinatura[scenIdx]; d.financ_chaves=c.financ_chaves[scenIdx]; }
+  else { d.parc2_chaves=c.parc2_chaves[scenIdx]; }
+  d.projeto = r.projeto[scenIdx]; d.obra = r.obra[scenIdx];
+  d.fim_reforma_ini_venda = v.fim_reforma_ini_venda[scenIdx]; d.ini_venda_aceite = v.ini_venda_aceite[scenIdx]; d.ccv_sinal = v.ccv_sinal[scenIdx];
+  if(financFinal){ d.parc2_financ=v.parc2_financ[scenIdx]; d.financ_chaves_v=v.financ_chaves[scenIdx]; }
+  else { d.parc2_chaves_v=v.parc2_chaves[scenIdx]; }
+  return d;
+}
+
+function valsFixed(compraVal, reformaVal, vendaVal, condominio){
+  return { compraVal, reformaVal, vendaVal, condominio };
+}
+
+function tirByPrazo(base, financInicial, financFinal, compraVal, reformaVal, vendaVal){
+  const vals = valsFixed(compraVal, reformaVal, vendaVal, base.condominio);
+  return [0,1,2].map(p=> calcTIR(daysForScenario(p, financInicial, financFinal), vals, financInicial, financFinal).tir);
+}
+
+function fmtR(v){ return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); }
+/** Máscara de campo monetário: mantém sempre o formato "350.000" (separador de milhar
+ *  brasileiro) enquanto o usuário digita, eliminando ambiguidade de interpretação. */
+function attachCurrencyMask(input){
+  input.addEventListener('input', ()=>{
+    const digits = input.value.replace(/\D/g,'');
+    if(digits===''){ input.value=''; return; }
+    input.value = parseInt(digits,10).toLocaleString('pt-BR');
+  });
+}
+function currencyValue(input){
+  const digits = input.value.replace(/\D/g,'');
+  return digits==='' ? 0 : parseInt(digits,10);
+}
+function setCurrencyValue(input, num){
+  input.value = num ? Math.round(num).toLocaleString('pt-BR') : '';
+}
+/** Interpreta números no formato brasileiro: ponto = milhar, vírgula = decimal.
+ *  "350.000" -> 350000 · "233.750,50" -> 233750.5 · "350000" -> 350000 · "350,5" -> 350.5 */
+function parseNumberBR(str){
+  if(str==null) return 0;
+  str = String(str).trim();
+  if(str==='') return 0;
+  str = str.replace(/\s/g,'');
+  if(str.includes(',')){
+    // vírgula presente => vírgula é decimal, pontos (se houver) são milhar
+    str = str.replace(/\./g,'').replace(',', '.');
+  } else {
+    // sem vírgula: se houver ponto(s), tratamos como separador de milhar
+    // (ex: "350.000" -> 350000), a menos que pareça claramente um decimal
+    // isolado com 1-2 casas no final de um único ponto sem repetição (ex: "2750.5")
+    const parts = str.split('.');
+    if(parts.length>1 && parts[parts.length-1].length===3 && parts.length>1 && !(parts.length===2 && parts[1].length<=2 && parts[0].length<=3)){
+      str = parts.join('');
+    } else if(parts.length>2){
+      str = parts.join('');
+    }
+  }
+  const n = parseFloat(str);
+  return isNaN(n) ? 0 : n;
+}
+function fmtPct(v){
+  if(v==null || !isFinite(v) || Math.abs(v)>10) return '—';
+  return (v*100).toFixed(1)+'%';
+}
+function tirClass(v){ if(v>=0.25) return 'good'; if(v>=0.22) return 'warn'; return 'bad'; }
+function uid(){ return 'id'+Date.now()+Math.random().toString(36).slice(2,8); }
+
+/* ============================================================
+   PERSISTÊNCIA (Firestore — compartilhado entre a equipe)
+   ============================================================ */
+async function loadList(key){
+  try{
+    const snap = await db.collection(key).get();
+    return snap.docs.map(d=>d.data());
+  } catch(e){ console.error('load error', key, e); return []; }
+}
+async function saveList(key, arr){
+  try{
+    await Promise.all(arr.map(item=> db.collection(key).doc(item.id).set(item)));
+  } catch(e){ console.error('save error', key, e); }
+}
+async function deleteRemote(key, id){
+  try{ await db.collection(key).doc(id).delete(); } catch(e){ console.error('delete error', key, e); }
+}
+
+let estudos = [];
+let investimentos = [];
+let unsubEstudos = null, unsubInvestimentos = null;
+
+function startLiveSync(){
+  if(unsubEstudos) unsubEstudos();
+  if(unsubInvestimentos) unsubInvestimentos();
+  unsubEstudos = db.collection('estudos').onSnapshot(snap=>{
+    estudos = snap.docs.map(d=>d.data());
+    if(currentEstudo){ const fresh = estudos.find(x=>x.id===currentEstudo.id); if(fresh) currentEstudo = fresh; }
+    renderEstudos();
+  }, err=>console.error('sync estudos error', err));
+  unsubInvestimentos = db.collection('investimentos').onSnapshot(snap=>{
+    investimentos = snap.docs.map(d=>d.data());
+    if(currentInv){ const fresh = investimentos.find(x=>x.id===currentInv.id); if(fresh) currentInv = fresh; }
+    renderInvestimentos();
+  }, err=>console.error('sync investimentos error', err));
+}
+
+/* ============================================================
+   AUTENTICAÇÃO
+   ============================================================ */
+document.getElementById('btn-login').addEventListener('click', async ()=>{
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if(!email || !pass){ errEl.textContent = 'Preencha e-mail e senha.'; return; }
+  try{
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e){
+    errEl.textContent = e.code==='auth/invalid-credential' || e.code==='auth/wrong-password' || e.code==='auth/user-not-found'
+      ? 'E-mail ou senha incorretos.' : 'Erro ao entrar: ' + e.message;
+  }
+});
+document.getElementById('login-password').addEventListener('keydown', ev=>{ if(ev.key==='Enter') document.getElementById('btn-login').click(); });
+document.getElementById('btn-login-reset').addEventListener('click', async ()=>{
+  const email = document.getElementById('login-email').value.trim();
+  const errEl = document.getElementById('login-error');
+  if(!email){ errEl.textContent = 'Digite seu e-mail acima e clique de novo para receber o link de redefinição.'; return; }
+  try{
+    await auth.sendPasswordResetEmail(email);
+    errEl.style.color = 'var(--good)';
+    errEl.textContent = 'E-mail de redefinição enviado — confira sua caixa de entrada.';
+  } catch(e){ errEl.style.color='var(--bad)'; errEl.textContent = 'Não foi possível enviar: ' + e.message; }
+});
+document.getElementById('btn-logout').addEventListener('click', ()=> auth.signOut());
+
+auth.onAuthStateChanged(async (user)=>{
+  if(user){
+    document.getElementById('login-screen').hidden = true;
+    document.getElementById('app-shell').hidden = false;
+    document.getElementById('user-email-label').textContent = user.email;
+    startLiveSync();
+    estudos = await loadList('estudos');
+    investimentos = await loadList('investimentos');
+    updateFinSeg();
+    renderEstudos();
+    renderInvestimentos();
+  } else {
+    document.getElementById('login-screen').hidden = false;
+    document.getElementById('app-shell').hidden = true;
+    if(unsubEstudos){ unsubEstudos(); unsubEstudos=null; }
+    if(unsubInvestimentos){ unsubInvestimentos(); unsubInvestimentos=null; }
+  }
+});
+
+/* ============================================================
+   NAVEGAÇÃO DE ABAS
+   ============================================================ */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('section.view').forEach(s=>s.classList.remove('active'));
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ============================================================
+   TAB ESTUDOS — lista
+   ============================================================ */
+function renderEstudos(){
+  const list = document.getElementById('estudos-list');
+  if(estudos.length===0){ list.innerHTML = '<div class="empty-state">Nenhum estudo de viabilidade ainda. Clique em "+ Novo estudo" para começar.</div>'; return; }
+  list.innerHTML = '';
+  estudos.slice().reverse().forEach(e=>{
+    const div = document.createElement('div');
+    div.className='item-card';
+    const badgeLabel = e.status==='analise' ? 'Em análise' : (e.status==='fechado' ? 'Fechado' : 'Descartado');
+    div.innerHTML = `<div class="main">
+        <div class="name">${e.nome || '(sem nome)'}</div>
+        <div class="meta">${e.endereco || '—'} · ${e.metragem||0} m²</div>
+      </div>
+      <div class="right">
+        <span class="badge ${e.status}">${badgeLabel}</span>
+        <span class="tir">${e.tirDefault!=null ? fmtPct(e.tirDefault) : '–'}</span>
+        <button class="btn ghost del-btn" data-id="${e.id}" title="Excluir" style="padding:6px 9px;font-size:15px;color:var(--ink-soft);">&times;</button>
+      </div>`;
+    div.querySelector('.del-btn').addEventListener('click', async (ev)=>{
+      ev.stopPropagation();
+      if(!confirm('Excluir este estudo?')) return;
+      estudos = estudos.filter(x=>x.id!==e.id);
+      await deleteRemote('estudos', e.id);
+      renderEstudos();
+    });
+    div.addEventListener('click', ()=>openEstudoResult(e));
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('btn-novo-estudo').addEventListener('click', ()=>{
+  editingEstudoId = null;
+  document.getElementById('estudos-home').hidden = true;
+  document.getElementById('estudo-form-panel').hidden = false;
+  fillFormFrom(null);
+});
+document.getElementById('btn-cancelar-estudo').addEventListener('click', ()=>{
+  document.getElementById('estudo-form-panel').hidden = true;
+  if(editingEstudoId){
+    document.getElementById('estudo-result-panel').hidden = false;
+  } else {
+    document.getElementById('estudos-home').hidden = false;
+  }
+});
+document.getElementById('btn-voltar-lista').addEventListener('click', ()=>{
+  document.getElementById('estudo-result-panel').hidden = true;
+  document.getElementById('estudos-home').hidden = false;
+});
+
+function updateReformaTotal(){
+  const m2 = parseNumberBR(document.getElementById('f-metragem').value);
+  const custoM2 = currencyValue(document.getElementById('f-reforma-m2'));
+  document.getElementById('f-reforma-total').textContent = fmtR(m2*custoM2);
+}
+document.getElementById('f-metragem').addEventListener('input', updateReformaTotal);
+document.getElementById('f-reforma-m2').addEventListener('input', updateReformaTotal);
+
+let currentEstudo = null;
+let editingEstudoId = null;
+let financInicial = false, financFinal = false;
+let matrixCompraVal = 0, matrixReformaVal = 0, matrixVendaVal = 0;
+
+function fillFormFrom(e){
+  document.getElementById('f-nome').value = e ? (e.nome||'') : '';
+  document.getElementById('f-endereco').value = e ? (e.endereco||'') : '';
+  document.getElementById('f-fechamento').value = e ? (e.dataFechamento||'') : new Date().toISOString().slice(0,10);
+  document.getElementById('f-metragem').value = e ? (e.metragem||'') : '';
+  setCurrencyValue(document.getElementById('f-compra'), e ? e.valorCompra : 0);
+  setCurrencyValue(document.getElementById('f-reforma-m2'), e ? e.reformaM2 : 0);
+  setCurrencyValue(document.getElementById('f-condominio'), e ? e.condominio : 0);
+  setCurrencyValue(document.getElementById('f-venda'), e ? e.valorVenda : 0);
+  updateReformaTotal();
+}
+
+document.getElementById('btn-editar-estudo').addEventListener('click', ()=>{
+  editingEstudoId = currentEstudo.id;
+  document.getElementById('estudo-result-panel').hidden = true;
+  document.getElementById('estudo-form-panel').hidden = false;
+  fillFormFrom(currentEstudo);
+});
+
+document.getElementById('btn-calcular-estudo').addEventListener('click', async ()=>{
+  const metragem = parseNumberBR(document.getElementById('f-metragem').value);
+  const custoM2 = currencyValue(document.getElementById('f-reforma-m2'));
+  const valorCompra = currencyValue(document.getElementById('f-compra'));
+  const valorVenda = currencyValue(document.getElementById('f-venda'));
+
+  if(!(valorCompra>0) || !(valorVenda>0) || !(metragem>0)){
+    alert('Preencha metragem, valor de compra e valor de venda (maiores que zero) para calcular a TIR.');
+    return;
+  }
+
+  let e;
+  if(editingEstudoId){
+    e = estudos.find(x=>x.id===editingEstudoId);
+  } else {
+    e = { id: uid(), status:'analise', createdAt: Date.now() };
+    estudos.push(e);
+  }
+  e.nome = document.getElementById('f-nome').value.trim();
+  e.endereco = document.getElementById('f-endereco').value.trim();
+  e.dataFechamento = document.getElementById('f-fechamento').value || null;
+  e.metragem = metragem;
+  e.valorCompra = valorCompra;
+  e.reformaM2 = custoM2;
+  e.valorReformaTotal = metragem*custoM2;
+  e.condominio = currencyValue(document.getElementById('f-condominio'));
+  e.valorVenda = valorVenda;
+
+  const r = calcTIR(daysForScenario(1,false,false), valsFixed(e.valorCompra, e.valorReformaTotal, e.valorVenda, e.condominio), false, false);
+  e.tirDefault = r.tir;
+  await saveList('estudos', estudos);
+  renderEstudos();
+  editingEstudoId = null;
+  document.getElementById('estudo-form-panel').hidden = true;
+  openEstudoResult(e);
+});
+
+function openEstudoResult(e){
+  currentEstudo = e;
+  financInicial = false; financFinal = false;
+  matrixCompraVal = e.valorCompra;
+  matrixReformaVal = e.valorReformaTotal;
+  matrixVendaVal = e.valorVenda;
+  document.getElementById('estudos-home').hidden = true;
+  document.getElementById('estudo-form-panel').hidden = true;
+  document.getElementById('estudo-result-panel').hidden = false;
+  document.getElementById('result-nome').textContent = e.nome || '(sem nome)';
+  document.getElementById('result-endereco').textContent = `${e.endereco||'—'} · ${e.metragem} m² · Compra ${fmtR(e.valorCompra)} · Reforma ${fmtR(e.valorReformaTotal)} (${fmtR(e.reformaM2)}/m²) · Venda ${fmtR(e.valorVenda)}`;
+  setCurrencyValue(document.getElementById('matrix-compra'), matrixCompraVal);
+  setCurrencyValue(document.getElementById('matrix-reforma'), matrixReformaVal);
+  setCurrencyValue(document.getElementById('matrix-venda'), matrixVendaVal);
+  updateFinSeg();
+  renderMatrix();
+  document.getElementById('btn-nao-fechado').disabled = e.status!=='analise';
+  document.getElementById('btn-sim-fechado').disabled = e.status!=='analise';
+  document.getElementById('btn-nao-fechado').textContent = e.status==='analise' ? 'Ainda não — aguardar' : (e.status==='descartado'?'Em espera':'—');
+  document.getElementById('btn-sim-fechado').textContent = e.status==='fechado' ? 'Negócio fechado ✓' : 'Sim, negócio fechado';
+}
+
+function bindMatrixValueInput(id, setter){
+  const inp = document.getElementById(id);
+  inp.addEventListener('input', ()=>{
+    const digits = inp.value.replace(/\D/g,'');
+    inp.value = digits==='' ? '' : parseInt(digits,10).toLocaleString('pt-BR');
+    setter(digits==='' ? 0 : parseInt(digits,10));
+    renderMatrix();
+  });
+}
+bindMatrixValueInput('matrix-compra', v=>matrixCompraVal=v);
+bindMatrixValueInput('matrix-reforma', v=>matrixReformaVal=v);
+bindMatrixValueInput('matrix-venda', v=>matrixVendaVal=v);
+
+function updateFinSeg(){
+  document.querySelectorAll('#seg-fin-inicial button').forEach(b=>b.classList.toggle('on', (b.dataset.v==='1')===financInicial));
+  document.querySelectorAll('#seg-fin-final button').forEach(b=>b.classList.toggle('on', (b.dataset.v==='1')===financFinal));
+}
+document.getElementById('seg-fin-inicial').addEventListener('click', ev=>{
+  if(ev.target.tagName!=='BUTTON') return;
+  financInicial = ev.target.dataset.v==='1'; updateFinSeg(); renderMatrix();
+});
+document.getElementById('seg-fin-final').addEventListener('click', ev=>{
+  if(ev.target.tagName!=='BUTTON') return;
+  financFinal = ev.target.dataset.v==='1'; updateFinSeg(); renderMatrix();
+});
+
+function renderMatrix(){
+  const tirs = tirByPrazo(currentEstudo, financInicial, financFinal, matrixCompraVal, matrixReformaVal, matrixVendaVal);
+  const body = document.getElementById('tir-matrix-body');
+  body.innerHTML = '';
+  const tr = document.createElement('tr');
+  tr.innerHTML = SCEN.map((name,i)=>{
+    const isBase = i===1;
+    return `<td class="${tirClass(tirs[i])}${isBase?' base':''}"><div class="cell">${fmtPct(tirs[i])}</div></td>`;
+  }).join('');
+  body.appendChild(tr);
+}
+
+document.getElementById('btn-nao-fechado').addEventListener('click', async ()=>{
+  currentEstudo.status='analise';
+  await saveList('estudos', estudos);
+  renderEstudos();
+  document.getElementById('btn-nao-fechado').disabled = true;
+  document.getElementById('btn-sim-fechado').disabled = true;
+});
+
+document.getElementById('btn-sim-fechado').addEventListener('click', async ()=>{
+  currentEstudo.status='fechado';
+  await saveList('estudos', estudos);
+
+  const inv = {
+    id: uid(),
+    estudoId: currentEstudo.id,
+    nome: currentEstudo.nome,
+    endereco: currentEstudo.endereco,
+    valorCompra: matrixCompraVal,
+    valorReformaTotal: matrixReformaVal,
+    condominio: currentEstudo.condominio,
+    valorVenda: matrixVendaVal,
+    financInicial: financInicial,
+    financFinal: financFinal,
+    dataFechamentoDefault: currentEstudo.dataFechamento || new Date().toISOString().slice(0,10),
+    compra: {}, obra: { liberacoes: [] }, venda: {},
+    createdAt: Date.now()
+  };
+  inv.tirDefault = presenteTIR(virtualDefaultInv(inv));
+  investimentos.push(inv);
+  await saveList('investimentos', investimentos);
+  renderInvestimentos();
+  renderEstudos();
+
+  document.querySelector('nav.tabs button[data-tab="investimentos"]').click();
+  openInvestimentoDetail(inv);
+});
+
+/* ============================================================
+   TAB INVESTIMENTOS
+   ============================================================ */
+function camposPreenchidos(inv){
+  ensureInvStruct(inv);
+  let total=0, preenchidos=0;
+  ['compra','venda'].forEach(sec=>{
+    Object.keys(inv[sec]).forEach(k=>{ total++; if(inv[sec][k]!==null && inv[sec][k]!=='' && inv[sec][k]!==undefined) preenchidos++; });
+  });
+  return { preenchidos, total: Math.max(total, 1) };
+}
+
+function renderInvestimentos(){
+  const list = document.getElementById('investimentos-list');
+  if(investimentos.length===0){ list.innerHTML = '<div class="empty-state">Nenhum investimento fechado ainda. Feche um estudo de viabilidade para começar o acompanhamento.</div>'; return; }
+  list.innerHTML = '';
+  investimentos.slice().reverse().forEach(inv=>{
+    const prog = camposPreenchidos(inv);
+    const div = document.createElement('div');
+    div.className='item-card';
+    div.innerHTML = `<div class="main">
+        <div class="name">${inv.nome || '(sem nome)'}</div>
+        <div class="meta">${inv.endereco||'—'} · ${prog.preenchidos}/${prog.total} dados lançados</div>
+      </div>
+      <div class="right">
+        <span class="tir">${fmtPct(presenteTIR(inv))}</span>
+        <button class="btn ghost del-btn" data-id="${inv.id}" title="Excluir" style="padding:6px 9px;font-size:15px;color:var(--ink-soft);">&times;</button>
+      </div>`;
+    div.querySelector('.del-btn').addEventListener('click', async (ev)=>{
+      ev.stopPropagation();
+      if(!confirm('Excluir este investimento?')) return;
+      investimentos = investimentos.filter(x=>x.id!==inv.id);
+      await deleteRemote('investimentos', inv.id);
+      renderInvestimentos();
+    });
+    div.addEventListener('click', ()=>openInvestimentoDetail(inv));
+    list.appendChild(div);
+  });
+}
+
+/* ============================================================
+   MOTOR DE PROJEÇÃO — mescla datas/valores reais já lançados
+   com projeções (prazos default) para os que ainda faltam
+   ============================================================ */
+function toDate(str){ return str ? new Date(str+'T00:00:00') : null; }
+function addDays(date, days){ const d=new Date(date); d.setDate(d.getDate()+Math.round(days)); return d; }
+function daysBetween(d1,d2){ return Math.round((d2-d1)/86400000); }
+function fmtDateBR(str){ if(!str) return null; const d=toDate(str); return d.toLocaleDateString('pt-BR'); }
+
+function ensureInvStruct(inv){
+  if(!inv.compra) inv.compra = {};
+  if(!inv.compra.outrasDespesas) inv.compra.outrasDespesas = [];
+  if(!inv.obra) inv.obra = { liberacoes: [] };
+  if(!inv.obra.liberacoes) inv.obra.liberacoes = [];
+  if(!inv.venda) inv.venda = {};
+  if(!inv.ui) inv.ui = { compraCollapsed:false };
+}
+
+function projectDates(inv){
+  const c = inv.compra, o = inv.obra, v = inv.venda;
+  const anchor = toDate(c.dataFechamento) || new Date();
+  const sinalDate = toDate(c.dataLiberacaoSinal) || toDate(c.dataAssinaturaCCV) || addDays(anchor, PRAZOS.compra_sem.aceite_sinal[1]);
+  let parcIntermediariaDate=null, parcFinalDate;
+  if(inv.financInicial){
+    parcIntermediariaDate = toDate(c.dataLiberacaoParcelaIntermediaria) || toDate(c.dataAssinaturaEmprestimo) || addDays(sinalDate, PRAZOS.compra_com.parc2_assinatura[1]);
+    parcFinalDate = toDate(c.dataLiberacaoParcelaFinal) || addDays(parcIntermediariaDate, PRAZOS.compra_com.financ_chaves[1]);
+  } else {
+    parcFinalDate = toDate(c.dataLiberacaoParcelaFinal) || addDays(sinalDate, PRAZOS.compra_sem.parc2_chaves[1]);
+  }
+  const chavesDate = toDate(c.dataRecebimentoChaves) || parcFinalDate;
+  const projetoDate = toDate(c.dataConclusaoProjeto) || addDays(chavesDate, PRAZOS.reforma.projeto[1]);
+  const orcamentoDate = toDate(c.dataConclusaoOrcamentoExecutivo) || projetoDate;
+
+  const inicioObraDate = toDate(o.dataInicioReforma) || orcamentoDate;
+  const fimObraProjetado = addDays(inicioObraDate, PRAZOS.reforma.obra[1]);
+  const fimObraDate = toDate(o.dataConclusao) || toDate(o.dataPrevisaoTermino) || fimObraProjetado;
+
+  const liberVendaDate = toDate(v.dataLiberacaoCorretores) || addDays(fimObraDate, PRAZOS.venda_sem.fim_reforma_ini_venda[1]);
+  const propostaDate = toDate(v.dataPropostaAceita) || addDays(liberVendaDate, PRAZOS.venda_sem.ini_venda_aceite[1]);
+  const vendaSinalDate = toDate(v.dataRecebimentoSinal) || toDate(v.dataAssinaturaCCV) || addDays(propostaDate, PRAZOS.venda_sem.ccv_sinal[1]);
+  let vendaParcIntermediariaDate=null, vendaParcFinalDate;
+  if(inv.financFinal){
+    vendaParcIntermediariaDate = toDate(v.dataRecebimentoParcelaIntermediaria) || toDate(v.dataAssinaturaFinanciamento) || addDays(vendaSinalDate, PRAZOS.venda_com.parc2_financ[1]);
+    vendaParcFinalDate = toDate(v.dataRecebimentoParcelaFinal) || addDays(vendaParcIntermediariaDate, PRAZOS.venda_com.financ_chaves[1]);
+  } else {
+    vendaParcFinalDate = toDate(v.dataRecebimentoParcelaFinal) || addDays(vendaSinalDate, PRAZOS.venda_sem.parc2_chaves[1]);
+  }
+  return { anchor, sinalDate, parcIntermediariaDate, parcFinalDate, chavesDate, projetoDate, orcamentoDate,
+    inicioObraDate, fimObraDate, liberVendaDate, propostaDate, vendaSinalDate, vendaParcIntermediariaDate, vendaParcFinalDate };
+}
+
+/** saldo da reforma ainda não liberado: redistribuído em parcelas a cada 20 dias
+ *  entre a última liberação (ou início da obra) e a data de término (real, prevista ou projetada) */
+function reformaOutflows(inv, dates){
+  const c = inv.compra, o = inv.obra;
+  const totalBudget = (c.valorOrcamentoExecutivo>0 ? c.valorOrcamentoExecutivo : inv.valorReformaTotal);
+  const liberacoes = (o.liberacoes||[]).filter(l=>l.data && l.valor>0);
+  const outflows = liberacoes.map(l=>({date:toDate(l.data), amt:l.valor}));
+  const sumLiberado = liberacoes.reduce((s,l)=>s+l.valor,0);
+  const remaining = Math.max(0, totalBudget - sumLiberado);
+  if(remaining>0){
+    const lastDate = liberacoes.length ? new Date(Math.max(...liberacoes.map(l=>toDate(l.data).getTime()))) : dates.inicioObraDate;
+    const endDate = dates.fimObraDate;
+    let remDays = daysBetween(lastDate, endDate);
+    if(remDays<1) remDays=1;
+    const nParc = Math.max(1, Math.round(remDays/20));
+    for(let i=0;i<nParc;i++){
+      outflows.push({date: addDays(lastDate, (i+1)*remDays/nParc), amt: remaining/nParc});
+    }
+  }
+  return outflows;
+}
+
+function buildCashflowLines(inv){
+  ensureInvStruct(inv);
+  const dates = projectDates(inv);
+  const c = inv.compra, v = inv.venda;
+  const compraVal = inv.valorCompra;
+  const vendaValBase = (v.valorVenda>0 ? v.valorVenda : inv.valorVenda);
+  const custoVendaPct = 0.135;
+  const lines = [];
+
+  const sinalVal = (c.valorSinal>0?c.valorSinal:compraVal*0.10) + (c.valorITBI>0?c.valorITBI:compraVal*0.04);
+  lines.push({label:'Sinal (10%) + ITBI/cartório', date:dates.sinalDate, amt:-sinalVal});
+  if(inv.financInicial){
+    lines.push({label:'Parcela intermediária (20%)', date:dates.parcIntermediariaDate, amt:-(c.valorParcelaIntermediaria>0?c.valorParcelaIntermediaria:compraVal*0.20)});
+    lines.push({label:'Parcela final (70%)', date:dates.parcFinalDate, amt:-(c.valorParcelaFinal>0?c.valorParcelaFinal:compraVal*0.70)});
+  } else {
+    lines.push({label:'Parcela final (90%)', date:dates.parcFinalDate, amt:-(c.valorParcelaFinal>0?c.valorParcelaFinal:compraVal*0.90)});
+  }
+  reformaOutflows(inv, dates).forEach((o,i)=>lines.push({label:`Parcela de reforma`, date:o.date, amt:-o.amt}));
+  (c.outrasDespesas||[]).filter(d=>d.data && d.valor>0).forEach(d=>lines.push({label:d.descricao||'Outra despesa', date:toDate(d.data), amt:-d.valor}));
+  {
+    let d = dates.chavesDate;
+    const end = dates.vendaParcFinalDate;
+    while(d < end){ d = addDays(d,30); if(d>end) d=end; lines.push({label:'Condomínio', date:new Date(d), amt:-inv.condominio}); }
+  }
+  const sinalV = v.valorRecebimentoSinal>0? v.valorRecebimentoSinal : vendaValBase*0.10;
+  lines.push({label:'Recebimento sinal venda (10%)', date:dates.vendaSinalDate, amt:sinalV});
+  if(inv.financFinal){
+    lines.push({label:'Recebimento parcela intermediária venda (20%)', date:dates.vendaParcIntermediariaDate, amt:(v.valorRecebimentoParcelaIntermediaria>0? v.valorRecebimentoParcelaIntermediaria : vendaValBase*0.20)});
+    lines.push({label:'Recebimento parcela final venda (70%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.70) - vendaValBase*custoVendaPct});
+  } else {
+    lines.push({label:'Recebimento parcela final venda (90%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.90) - vendaValBase*custoVendaPct});
+  }
+  lines.sort((a,b)=>a.date-b.date);
+  return { lines, anchor: dates.anchor };
+}
+
+function presenteTIR(inv){
+  const { lines, anchor } = buildCashflowLines(inv);
+  const xcfs = lines.map(l=>({days: daysBetween(anchor, l.date), amt: l.amt}));
+  return xirr(xcfs);
+}
+
+/** monta um investimento "virtual" só com a data de fechamento prevista, sem nenhum
+ *  dado real lançado — usado para exibir o cronograma/TIR 100% projetados (default) */
+function virtualDefaultInv(inv){
+  return {
+    valorCompra: inv.valorCompra, valorReformaTotal: inv.valorReformaTotal,
+    valorVenda: inv.valorVenda, condominio: inv.condominio,
+    financInicial: inv.financInicial, financFinal: inv.financFinal,
+    compra: { dataFechamento: inv.dataFechamentoDefault }, obra: { liberacoes: [] }, venda: {}
+  };
+}
+
+/* ============================================================
+   FORMULÁRIO DE LANÇAMENTO — datas (calendário) e valores (R$)
+   alinhados sempre nas mesmas colunas (label | data | valor)
+   ============================================================ */
+function row(label, datePath, valuePath, placeholder){
+  const dateCell = datePath ? `<input type="date" data-path="${datePath}">` : `<div class="e-empty"></div>`;
+  const valCell = valuePath ? `<input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" placeholder="${placeholder||''}">` : `<div class="e-empty"></div>`;
+  return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div>`;
+}
+function getPath(obj, path){ return path.split('.').reduce((o,k)=>(o? o[k] : undefined), obj); }
+function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i=0;i<ks.length-1;i++){ if(!o[ks[i]]) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
+
+let currentInv = null;
+
+document.getElementById('btn-voltar-investimentos').addEventListener('click', ()=>{
+  document.getElementById('investimento-detail').hidden = true;
+  document.getElementById('investimentos-home').hidden = false;
+});
+
+function openInvestimentoDetail(inv){
+  currentInv = inv;
+  ensureInvStruct(inv);
+  if(!inv.compra.outrasDespesas) inv.compra.outrasDespesas = [];
+  if(!inv.ui) inv.ui = { compraCollapsed:false };
+  document.getElementById('investimentos-home').hidden = true;
+  document.getElementById('investimento-detail').hidden = false;
+  document.getElementById('inv-nome').textContent = inv.nome || '(sem nome)';
+  document.getElementById('inv-endereco').textContent = `${inv.endereco||'—'} · Financ. inicial: ${inv.financInicial?'sim':'não'} · Financ. final: ${inv.financFinal?'sim':'não'}`;
+  document.getElementById('inv-tir-default').textContent = fmtPct(inv.tirDefault);
+  buildInvForm();
+  updateInvPresente();
+}
+
+function abrirCronogramaEmJanela(){
+  const { lines } = buildCashflowLines(virtualDefaultInv(currentInv));
+  const rows = lines.map(l=>{
+    const cor = l.amt<0 ? '#B23A2E' : '#1E7A3D';
+    return `<tr><td>${l.date.toLocaleDateString('pt-BR')}</td><td>${l.label}</td><td style="color:${cor};text-align:right;">${fmtR(l.amt)}</td></tr>`;
+  }).join('');
+  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+    <title>Cronograma previsto — ${currentInv.nome||''}</title>
+    <style>
+      body{font-family:Arial,sans-serif;margin:24px;color:#16232E;background:#F4F5F1;}
+      h1{font-size:18px;margin:0 0 4px;}
+      p.sub{font-size:12.5px;color:#54626D;margin:0 0 20px;}
+      table{border-collapse:collapse;width:100%;background:#fff;border-radius:8px;overflow:hidden;}
+      th,td{padding:9px 12px;font-size:13px;text-align:left;border-bottom:1px solid #E7E9E2;}
+      th{background:#16232E;color:#fff;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;}
+      td:last-child, th:last-child{text-align:right;}
+    </style></head><body>
+    <h1>Cronograma previsto (default) — ${currentInv.nome||'(sem nome)'}</h1>
+    <p class="sub">${currentInv.endereco||''} · TIR default: ${fmtPct(currentInv.tirDefault)} · Referência a partir de ${toDate(currentInv.dataFechamentoDefault).toLocaleDateString('pt-BR')}. Esta janela é só para consulta — não altera os dados lançados.</p>
+    <table><thead><tr><th>Data prevista</th><th>Lançamento</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table>
+    </body></html>`;
+  const win = window.open('', '_blank', 'width=640,height=720');
+  if(win){ win.document.write(html); win.document.close(); }
+  else { alert('Não foi possível abrir a nova janela — verifique se o navegador bloqueou pop-ups.'); }
+}
+
+document.getElementById('btn-toggle-cronograma').addEventListener('click', abrirCronogramaEmJanela);
+
+function buildInvForm(){
+  const wrap = document.getElementById('inv-phases');
+  const fin1 = currentInv.financInicial, fin2 = currentInv.financFinal;
+
+  let compraFields = row('Data de fechamento do negócio','compra.dataFechamento') +
+    row('Data de assinatura do CCV','compra.dataAssinaturaCCV') +
+    `<div class="despesas-block">
+       <div class="desp-hdr">Outras despesas da compra (discriminadas)</div>
+       <div id="despesas-rows" class="entry-table"></div>
+       <button class="btn subtle" id="btn-add-despesa" type="button" style="margin-top:6px;">+ Adicionar despesa</button>
+     </div>` +
+    row('Data de liberação do sinal','compra.dataLiberacaoSinal','compra.valorSinal', 'R$') +
+    row('Valor do ITBI e cartório', null, 'compra.valorITBI', 'R$');
+  if(fin1){
+    compraFields += row('Data de liberação da parcela intermediária','compra.dataLiberacaoParcelaIntermediaria','compra.valorParcelaIntermediaria', 'R$') +
+      row('Data de assinatura do empréstimo de compra','compra.dataAssinaturaEmprestimo') +
+      row('Data de liberação da parcela final','compra.dataLiberacaoParcelaFinal','compra.valorParcelaFinal', 'R$');
+  } else {
+    compraFields += row('Data de liberação da parcela final','compra.dataLiberacaoParcelaFinal','compra.valorParcelaFinal', 'R$');
+  }
+  compraFields += row('Data de recebimento das chaves','compra.dataRecebimentoChaves') +
+    row('Data da conclusão do projeto','compra.dataConclusaoProjeto') +
+    row('Data da conclusão do orçamento executivo','compra.dataConclusaoOrcamentoExecutivo','compra.valorOrcamentoExecutivo', 'R$') +
+    row('Data de liberação da reforma pelo condomínio','compra.dataLiberacaoReformaCondominio');
+
+  const obraFields = row('Data do início da reforma','obra.dataInicioReforma') +
+    row('Data de previsão de término da reforma','obra.dataPrevisaoTermino') +
+    row('Data da conclusão da reforma','obra.dataConclusao');
+
+  let vendaFields = row('Data de liberação do apto para venda (corretores)','venda.dataLiberacaoCorretores') +
+    row('Data de proposta aceita','venda.dataPropostaAceita','venda.valorVenda', 'R$') +
+    row('Data de assinatura do CCV','venda.dataAssinaturaCCV') +
+    row('Data de recebimento do sinal','venda.dataRecebimentoSinal','venda.valorRecebimentoSinal', 'R$');
+  if(fin2){
+    vendaFields += row('Data de recebimento da parcela intermediária','venda.dataRecebimentoParcelaIntermediaria','venda.valorRecebimentoParcelaIntermediaria', 'R$') +
+      row('Data de assinatura do financiamento bancário','venda.dataAssinaturaFinanciamento') +
+      row('Data de recebimento da parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
+  } else {
+    vendaFields += row('Data de recebimento da parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
+  }
+
+  const compraCollapsed = currentInv.ui.compraCollapsed;
+  wrap.innerHTML = `
+    <div class="phase-block${compraCollapsed?' collapsed':''}" id="block-compra">
+      <div class="phase-head"><h3 style="color:#0E5C52">Etapa da compra</h3>
+        <button class="phase-collapse-btn" id="btn-collapse-compra">${compraCollapsed?'Expandir':'Concluída — minimizar'}</button></div>
+      <div class="phase-body"><div class="entry-table">${compraFields}</div></div>
+    </div>
+    <div class="phase-block">
+      <div class="phase-head"><h3 style="color:#9A6B0A">Etapa da obra</h3></div>
+      <div class="phase-body">
+        <div class="entry-table">${obraFields}</div>
+        <label class="field" style="margin:14px 0 6px;">Liberações da reforma (datas e valores já pagos)</label>
+        <div id="liber-rows" class="entry-table"></div>
+        <button class="btn subtle" id="btn-add-liber" type="button" style="margin-top:6px;">+ Adicionar liberação</button>
+      </div>
+    </div>
+    <div class="phase-block">
+      <div class="phase-head"><h3 style="color:#1E7A3D">Etapa da venda</h3></div>
+      <div class="phase-body"><div class="entry-table">${vendaFields}</div></div>
+    </div>
+  `;
+
+  // preencher valores salvos
+  wrap.querySelectorAll('input[data-path]').forEach(inp=>{
+    const val = getPath(currentInv, inp.dataset.path);
+    if(inp.type==='date'){ inp.value = val || ''; }
+    else if(val>0){ setCurrencyValue(inp, val); }
+  });
+
+  renderLiberRows();
+  renderDespesasRows();
+
+  wrap.querySelectorAll('input[type=date][data-path]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      setPath(currentInv, inp.dataset.path, inp.value || null);
+      updateInvPresente();
+      await saveList('investimentos', investimentos);
+    });
+  });
+  wrap.querySelectorAll('input.money-mask[data-path]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const digits = inp.value.replace(/\D/g,'');
+      inp.value = digits==='' ? '' : parseInt(digits,10).toLocaleString('pt-BR');
+    });
+    inp.addEventListener('change', async ()=>{
+      setPath(currentInv, inp.dataset.path, currencyValue(inp));
+      updateInvPresente();
+      await saveList('investimentos', investimentos);
+    });
+  });
+
+  document.getElementById('btn-add-liber').addEventListener('click', async ()=>{
+    currentInv.obra.liberacoes.push({data:'', valor:0});
+    await saveList('investimentos', investimentos);
+    renderLiberRows();
+    updateInvPresente();
+  });
+  document.getElementById('btn-add-despesa').addEventListener('click', async ()=>{
+    currentInv.compra.outrasDespesas.push({descricao:'', data:'', valor:0});
+    await saveList('investimentos', investimentos);
+    renderDespesasRows();
+    updateInvPresente();
+  });
+  document.getElementById('btn-collapse-compra').addEventListener('click', async ()=>{
+    currentInv.ui.compraCollapsed = !currentInv.ui.compraCollapsed;
+    document.getElementById('block-compra').classList.toggle('collapsed', currentInv.ui.compraCollapsed);
+    document.getElementById('btn-collapse-compra').textContent = currentInv.ui.compraCollapsed ? 'Expandir' : 'Concluída — minimizar';
+    await saveList('investimentos', investimentos);
+  });
+}
+
+function renderLiberRows(){
+  const box = document.getElementById('liber-rows');
+  box.innerHTML='';
+  (currentInv.obra.liberacoes||[]).forEach((l,i)=>{
+    box.innerHTML += `<div class="e-empty"></div>
+      <input type="date" value="${l.data||''}" data-li="${i}" data-f="data">
+      <input type="text" inputmode="decimal" class="money-mask" value="${l.valor?Math.round(l.valor).toLocaleString('pt-BR'):''}" placeholder="R$" data-li="${i}" data-f="valor">
+      <button class="e-rm" data-rm="${i}" type="button" title="Remover">&times;</button>`;
+  });
+  box.querySelectorAll('input[type=date][data-li]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      currentInv.obra.liberacoes[Number(inp.dataset.li)].data = inp.value || '';
+      updateInvPresente();
+      await saveList('investimentos', investimentos);
+    });
+  });
+  box.querySelectorAll('input.money-mask[data-li]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const digits = inp.value.replace(/\D/g,'');
+      inp.value = digits==='' ? '' : parseInt(digits,10).toLocaleString('pt-BR');
+    });
+    inp.addEventListener('change', async ()=>{
+      currentInv.obra.liberacoes[Number(inp.dataset.li)].valor = currencyValue(inp);
+      updateInvPresente();
+      await saveList('investimentos', investimentos);
+    });
+  });
+  box.querySelectorAll('button[data-rm]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      currentInv.obra.liberacoes.splice(Number(btn.dataset.rm),1);
+      await saveList('investimentos', investimentos);
+      renderLiberRows();
+      updateInvPresente();
+    });
+  });
+}
+
+function renderDespesasRows(){
+  const box = document.getElementById('despesas-rows');
+  if(!box) return;
+  box.innerHTML='';
+  (currentInv.compra.outrasDespesas||[]).forEach((d,i)=>{
+    box.innerHTML += `<input type="text" class="e-desc" placeholder="Descrição" value="${d.descricao||''}" data-di="${i}" data-f="descricao">
+      <input type="date" value="${d.data||''}" data-di="${i}" data-f="data">
+      <input type="text" inputmode="decimal" class="money-mask" value="${d.valor?Math.round(d.valor).toLocaleString('pt-BR'):''}" placeholder="R$" data-di="${i}" data-f="valor">
+      <button class="e-rm" data-rmd="${i}" type="button" title="Remover">&times;</button>`;
+  });
+  box.querySelectorAll('input.e-desc[data-di]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      currentInv.compra.outrasDespesas[Number(inp.dataset.di)].descricao = inp.value;
+      await saveList('investimentos', investimentos);
+    });
+  });
+  box.querySelectorAll('input[type=date][data-di]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      currentInv.compra.outrasDespesas[Number(inp.dataset.di)].data = inp.value || '';
+      updateInvPresente();
+      await saveList('investimentos', investimentos);
+    });
+  });
+  box.querySelectorAll('input.money-mask[data-di]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const digits = inp.value.replace(/\D/g,'');
+      inp.value = digits==='' ? '' : parseInt(digits,10).toLocaleString('pt-BR');
+    });
+    inp.addEventListener('change', async ()=>{
+      currentInv.compra.outrasDespesas[Number(inp.dataset.di)].valor = currencyValue(inp);
+      updateInvPresente();
+      await saveList('investimentos', investimentos);
+    });
+  });
+  box.querySelectorAll('button[data-rmd]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      currentInv.compra.outrasDespesas.splice(Number(btn.dataset.rmd),1);
+      await saveList('investimentos', investimentos);
+      renderDespesasRows();
+      updateInvPresente();
+    });
+  });
+}
+
+function updateInvPresente(){
+  document.getElementById('inv-tir-presente').textContent = fmtPct(presenteTIR(currentInv));
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+[document.getElementById('f-compra'), document.getElementById('f-reforma-m2'),
+ document.getElementById('f-condominio'), document.getElementById('f-venda')].forEach(attachCurrencyMask);
+</script>
+</body>
+</html>
