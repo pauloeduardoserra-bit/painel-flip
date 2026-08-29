@@ -41,7 +41,8 @@ header.app{padding:28px 32px 20px;background:var(--accent);position:relative;}
 .brand .mark::after{content:'';position:absolute;left:6px;right:6px;top:14px;height:1px;background:#fff;}
 .brand h1{font-size:19px;letter-spacing:.01em;color:#fff;font-family:Georgia,serif;}
 .brand .sub{font-size:11px;color:rgba(255,255,255,0.65);font-family:sans-serif;letter-spacing:.1em;text-transform:uppercase;}
-nav.tabs{display:flex;gap:6px;overflow-x:auto;}
+nav.tabs{display:flex;gap:6px;}
+nav.tabs button{flex:1;text-align:center;}
 nav.tabs button{background:rgba(255,255,255,0.12);border:1px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.75);border-radius:20px;white-space:nowrap;}
 nav.tabs button.active{color:var(--accent);background:#fff;font-weight:600;}
 
@@ -126,11 +127,11 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .phase-collapse-btn{border:.5px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:20px;font-size:11.5px;color:var(--ink-soft);}
 .phase-block.collapsed .phase-body{display:none;}
 @media (max-width:720px){ .entry-table, .despesas-block .entry-table{grid-template-columns:1fr 1fr 1fr 24px;} }
-.compare-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
-.compare-card{background:var(--panel);border:.5px solid var(--line);border-radius:var(--radius);padding:18px;}
-.compare-card .lbl{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
-.compare-card .tir{font-family:sans-serif;font-size:28px;font-weight:600;}
-.compare-card.present{border:2px solid var(--accent);}
+.tir-line{display:flex;align-items:center;gap:24px;margin-bottom:22px;padding-bottom:16px;border-bottom:.5px solid var(--line);}
+.tir-line-item{display:flex;align-items:baseline;gap:8px;}
+.tir-line-lbl{font-size:12.5px;color:var(--ink-soft);}
+.tir-line-val{font-family:sans-serif;font-size:24px;font-weight:700;color:var(--ink);}
+.tir-line-item.present .tir-line-val{color:var(--accent);}
 .back-link{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;display:inline-block;}
 .back-link:hover{color:var(--ink);}
 
@@ -147,7 +148,8 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 }
 @media (max-width:640px){
   .form-grid{grid-template-columns:1fr;}
-  .compare-cards{grid-template-columns:1fr;}
+  nav.tabs button{padding:8px 6px;font-size:12px;}
+  .tir-line{flex-wrap:wrap;gap:10px 24px;}
   header.app,main{padding-left:16px;padding-right:16px;}
   #prazos-tables > div{grid-template-columns:1fr !important;}
 }
@@ -186,9 +188,9 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
     </div>
   </div>
   <nav class="tabs">
-    <button data-tab="estudos" class="active">Estudos de viabilidade</button>
-    <button data-tab="investimentos">Investimentos realizados</button>
-    <button data-tab="prazos">Prazos default</button>
+    <button data-tab="estudos" class="active">Viabilidade</button>
+    <button data-tab="investimentos">Investimentos</button>
+    <button data-tab="prazos">Prazos</button>
   </nav>
 </header>
 
@@ -340,14 +342,14 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
         <h3 id="inv-nome" class="inv-nome-destaque"></h3>
         <p id="inv-endereco" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 22px;"></p>
 
-        <div class="compare-cards">
-          <div class="compare-card">
-            <div class="lbl">TIR situação default (100% projetada, a partir da data de encontro do apto)</div>
-            <div class="tir" id="inv-tir-default">–</div>
+        <div class="tir-line">
+          <div class="tir-line-item">
+            <span class="tir-line-lbl">Default</span>
+            <span class="tir-line-val" id="inv-tir-default">–</span>
           </div>
-          <div class="compare-card present">
-            <div class="lbl">TIR situação presente (mescla dados reais lançados + projeção do restante)</div>
-            <div class="tir" id="inv-tir-presente">–</div>
+          <div class="tir-line-item present">
+            <span class="tir-line-lbl">Real</span>
+            <span class="tir-line-val" id="inv-tir-presente">–</span>
           </div>
         </div>
 
@@ -355,6 +357,7 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
           <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 8px;font-weight:500;">Evolução da TIR real ao longo do tempo</p>
           <div style="position:relative;height:180px;">
             <canvas id="tir-chart"></canvas>
+            <div id="tir-chart-empty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;color:var(--ink-faint);font-size:12.5px;text-align:center;padding:0 20px;">O gráfico começa a partir do primeiro dado real lançado</div>
           </div>
         </div>
 
@@ -922,7 +925,7 @@ document.getElementById('btn-sim-fechado').addEventListener('click', async ()=>{
     createdAt: Date.now()
   };
   inv.tirDefault = presenteTIR(virtualDefaultInv(inv));
-  inv.tirHistory = [{ts: inv.dataFechamentoDefault, tir: inv.tirDefault}];
+  inv.tirHistory = [];
   investimentos.push(inv);
   await saveList('investimentos', investimentos);
   renderInvestimentos();
@@ -1149,19 +1152,26 @@ function realTIR(inv){
   return xirr(xcfs);
 }
 
+function fmtValNoPrefix(v){
+  const s = Math.round(Math.abs(v)).toLocaleString('pt-BR');
+  return v<0 ? '-'+s : s;
+}
 function abrirLedgerModal(mode){
   const isDefault = mode==='default';
-  const lines = isDefault
+  const lines = (isDefault
     ? buildCashflowLines(virtualDefaultInv(currentInv)).lines
-    : buildCashflowLines(currentInv).lines.filter(l=>l.real);
+    : buildCashflowLines(currentInv).lines.filter(l=>l.real)
+  ).sort((a,b)=>a.date-b.date);
   document.getElementById('ledger-modal-title').textContent = isDefault ? 'Movimento de Caixa (default)' : 'Movimento de Caixa (real)';
   const tirLabel = isDefault ? fmtPct(currentInv.tirDefault) : fmtPct(realTIR(currentInv));
   document.getElementById('ledger-modal-sub').textContent = isDefault
     ? `TIR default: ${tirLabel} · Projeção 100% a partir da data de encontro do apto — não altera os dados lançados.`
     : `TIR real (só com o que já foi lançado): ${tirLabel}. ${lines.length===0?'Nenhum lançamento real registrado ainda.':''}`;
-  document.getElementById('ledger-modal-body').innerHTML = lines.map(l=>{
+  const lastYearRef = {y:null};
+  document.getElementById('ledger-modal-body').innerHTML = lines.map((l,i)=>{
     const cor = l.amt<0 ? 'var(--bad)' : 'var(--good)';
-    return `<tr><td style="text-align:left;padding:7px 10px;">${l.date.toLocaleDateString('pt-BR')}</td><td style="text-align:left;padding:7px 10px;">${l.label}</td><td style="color:${cor};padding:7px 10px;">${fmtR(l.amt)}</td></tr>`;
+    const dLabel = fmtChartDateLabel(l.date, i, lastYearRef);
+    return `<tr><td style="text-align:left;padding:7px 10px;white-space:nowrap;">${dLabel}</td><td style="text-align:left;padding:7px 10px;">${l.label}</td><td style="color:${cor};padding:7px 10px;white-space:nowrap;">${fmtValNoPrefix(l.amt)}</td></tr>`;
   }).join('');
   document.getElementById('ledger-modal').hidden = false;
 }
@@ -1179,25 +1189,41 @@ document.addEventListener('keydown', (ev)=>{ if(ev.key==='Escape') fecharLedgerM
 let tirChartInstance = null;
 function recordTirHistory(inv, tir){
   if(!isFinite(tir)) return;
-  if(!inv.tirHistory || !inv.tirHistory.length) inv.tirHistory = [{ts: inv.dataFechamentoDefault, tir: inv.tirDefault}];
+  if(!inv.tirHistory) inv.tirHistory = [];
   const today = new Date().toISOString().slice(0,10);
   const last = inv.tirHistory[inv.tirHistory.length-1];
   if(last && last.ts===today){ last.tir = tir; }
   else { inv.tirHistory.push({ts:today, tir}); }
 }
+function fmtChartDateLabel(d, idx, lastYearRef){
+  const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0');
+  const showYear = idx===0 || d.getFullYear()!==lastYearRef.y;
+  lastYearRef.y = d.getFullYear();
+  return showYear ? `${dd}/${mm}/${String(d.getFullYear()).slice(-2)}` : `${dd}/${mm}`;
+}
 function renderTirChart(){
-  const hist = currentInv.tirHistory && currentInv.tirHistory.length ? currentInv.tirHistory : [{ts: currentInv.dataFechamentoDefault, tir: currentInv.tirDefault}];
-  const labels = hist.map(h=>new Date(h.ts+'T00:00:00').toLocaleDateString('pt-BR'));
+  const hist = currentInv.tirHistory || [];
+  const canvas = document.getElementById('tir-chart');
+  const emptyMsg = document.getElementById('tir-chart-empty');
+  if(tirChartInstance){ tirChartInstance.destroy(); tirChartInstance=null; }
+  if(!hist.length){
+    canvas.style.display='none';
+    if(emptyMsg) emptyMsg.style.display='flex';
+    return;
+  }
+  canvas.style.display='block';
+  if(emptyMsg) emptyMsg.style.display='none';
+  const lastYearRef = {y:null};
+  const labels = hist.map((h,i)=>fmtChartDateLabel(new Date(h.ts+'T00:00:00'), i, lastYearRef));
   const data = hist.map(h=>+(h.tir*100).toFixed(1));
-  const ctx = document.getElementById('tir-chart').getContext('2d');
-  if(tirChartInstance){ tirChartInstance.destroy(); }
+  const ctx = canvas.getContext('2d');
   tirChartInstance = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [{ label:'TIR (%)', data, borderColor:'#3C3489', backgroundColor:'rgba(60,52,137,0.10)', tension:.25, fill:true, pointRadius:3, pointBackgroundColor:'#3C3489' }] },
     options: {
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c=>c.parsed.y+'%' } } },
-      scales:{ y:{ ticks:{ callback: v=>v+'%' } } }
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c=>c.parsed.y.toFixed(1)+'%' } } },
+      scales:{ y:{ ticks:{ callback: v=>(+v).toFixed(1)+'%' } } }
     }
   });
 }
@@ -1398,7 +1424,8 @@ function renderDespesasRows(){
 function updateInvPresente(){
   const tir = presenteTIR(currentInv);
   document.getElementById('inv-tir-presente').textContent = fmtPct(tir);
-  recordTirHistory(currentInv, tir);
+  const hasReal = buildCashflowLines(currentInv).lines.some(l=>l.real);
+  if(hasReal) recordTirHistory(currentInv, tir);
   renderTirChart();
 }
 
