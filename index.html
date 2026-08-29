@@ -27,7 +27,7 @@
   font-family:sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);max-width:100%;overflow-x:hidden;}
 body{padding:0 0 80px;font-family:sans-serif;}
 h1,h2,h3{font-family:Georgia,serif;font-weight:600;margin:0;}
 .mono{font-family:sans-serif;}
@@ -35,7 +35,7 @@ button{font-family:inherit;cursor:pointer;}
 
 /* header */
 header.app{padding:28px 32px 20px;background:var(--accent);position:relative;}
-.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;}
+.brand{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .brand .mark{width:30px;height:30px;border:1.5px solid #fff;border-radius:50%;position:relative;flex-shrink:0;}
 .brand .mark::before{content:'';position:absolute;left:6px;right:6px;top:9px;height:1px;background:#fff;}
 .brand .mark::after{content:'';position:absolute;left:6px;right:6px;top:14px;height:1px;background:#fff;}
@@ -79,7 +79,9 @@ section.view.active{display:block;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
 .form-grid .span2{grid-column:1/-1;}
 label.field{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;font-family:sans-serif;}
-input[type=text],input[type=number]{width:100%;border:.5px solid var(--line);border-radius:var(--radius-s);padding:9px 11px;font-size:14px;font-family:sans-serif;background:var(--bg);color:var(--ink);}
+input[type=text],input[type=number],input[type=date]{width:100%;border:.5px solid var(--line);border-radius:var(--radius-s);padding:9px 11px;font-size:14px;font-family:sans-serif;background:var(--bg);color:var(--ink);}
+.field-highlight{border:2px solid var(--accent) !important;background:var(--accent-soft) !important;font-weight:700;}
+input[type=date].field-highlight{color:var(--accent);}
 input:focus{outline:2px solid var(--accent);outline-offset:1px;}
 .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
 .derived{font-size:12.5px;color:var(--ink-soft);margin-top:5px;}
@@ -114,7 +116,7 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .phase-block{margin-bottom:26px;}
 .phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .phase-head h3.phase-title{font-size:19px;font-weight:700;letter-spacing:.04em;font-family:sans-serif;}
-.entry-table{display:grid;grid-template-columns:minmax(160px,1fr) 148px 148px 30px;row-gap:3px;column-gap:12px;align-items:center;}
+.entry-table{display:grid;grid-template-columns:minmax(90px,1.5fr) 1fr 1fr 22px;row-gap:3px;column-gap:8px;align-items:center;max-width:100%;}
 .entry-table .e-label{font-size:12px;color:var(--ink-soft);padding:5px 0;}
 .entry-table input[type=date]{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
@@ -125,10 +127,10 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 .entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
 .despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-s);border:.5px dashed var(--line);}
 .despesas-block .desp-hdr{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
-.despesas-block .entry-table{grid-template-columns:minmax(140px,1fr) 140px 130px 26px;}
+.despesas-block .entry-table{grid-template-columns:minmax(80px,1.4fr) 1fr 1fr 22px;}
 .phase-collapse-btn{border:.5px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:20px;font-size:11.5px;color:var(--ink-soft);}
 .phase-block.collapsed .phase-body{display:none;}
-@media (max-width:720px){ .entry-table, .despesas-block .entry-table{grid-template-columns:1fr 1fr 1fr 24px;} }
+@media (max-width:720px){ .entry-table .e-label{font-size:11px;} }
 .tir-line{display:flex;align-items:center;gap:24px;margin-bottom:22px;padding-bottom:16px;border-bottom:.5px solid var(--line);}
 .tir-line-item{display:flex;align-items:baseline;gap:8px;}
 .tir-line-lbl{font-size:12.5px;color:var(--ink-soft);}
@@ -142,7 +144,7 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 .inv-nome-destaque{font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);margin:0 0 4px;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:1000;padding:0;}
 .modal-overlay[hidden]{display:none !important;}
-#field-hint-tooltip{position:fixed;background:var(--ink);color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;z-index:2000;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+#field-hint-tooltip{position:fixed;top:14px;right:14px;left:auto;max-width:min(300px,calc(100vw - 28px));background:var(--accent);color:#fff;font-size:13px;line-height:1.4;padding:10px 14px;border-radius:10px;z-index:2000;pointer-events:none;white-space:normal;box-shadow:0 4px 16px rgba(0,0,0,.25);}
 #field-hint-tooltip[hidden]{display:none !important;}
 #login-screen[hidden]{display:none !important;}
 .modal-panel{background:var(--panel);border-radius:18px 18px 0 0;padding:24px 16px 34px;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;}
@@ -182,15 +184,15 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 <div id="app-shell" hidden>
 
 <header class="app">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;">
+  <div class="header-top-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
     <div class="brand" style="margin-bottom:0;">
       <span class="mark"></span>
       <h1>Painel de Investimentos</h1>
       <span class="sub">FLIP · TIR</span>
     </div>
-    <div style="display:flex;gap:8px;flex-shrink:0;">
+    <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;">
       <button class="btn subtle" id="btn-export-backup" style="font-size:12px;white-space:nowrap;">Exportar backup</button>
-      <button class="btn ghost" id="btn-logout" style="font-size:12px;white-space:nowrap;">Sair (<span id="user-email-label"></span>)</button>
+      <button class="btn ghost" id="btn-logout" style="font-size:12px;white-space:nowrap;" title=""><span id="user-email-label" style="display:none;"></span>Sair</button>
     </div>
   </div>
   <nav class="tabs">
@@ -231,8 +233,12 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
           <input type="text" id="f-endereco" placeholder="Rua, número, bairro">
         </div>
         <div>
-          <label class="field">Data de encontro do apto <span style="font-weight:400">— data zero do caixa</span></label>
+          <label class="field">Data de encontro do apto</label>
           <input type="date" id="f-fechamento">
+        </div>
+        <div>
+          <label class="field">Data aceite compra</label>
+          <input type="date" id="f-aceite-compra" class="field-highlight">
         </div>
         <div>
           <label class="field">Metragem (m²)</label>
@@ -245,7 +251,10 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
         <div>
           <label class="field">Custo de reforma por m² (R$)</label>
           <input type="text" inputmode="decimal" id="f-reforma-m2" placeholder="2.750">
-          <div class="derived">Total estimado: <b id="f-reforma-total">R$ 0</b></div>
+        </div>
+        <div>
+          <label class="field">Custo Total estimado (R$)</label>
+          <input type="text" id="f-reforma-total-input" class="field-highlight" readonly>
         </div>
         <div>
           <label class="field">Condomínio mensal (R$)</label>
@@ -253,7 +262,7 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
         </div>
         <div>
           <label class="field">Valor estimado de venda (R$)</label>
-          <input type="text" inputmode="decimal" id="f-venda" placeholder="850.000">
+          <input type="text" inputmode="decimal" id="f-venda" placeholder="850.000" class="field-highlight">
         </div>
       </div>
       <div class="form-actions">
@@ -705,7 +714,7 @@ auth.onAuthStateChanged(async (user)=>{
   if(user){
     document.getElementById('login-screen').hidden = true;
     document.getElementById('app-shell').hidden = false;
-    document.getElementById('user-email-label').textContent = user.email;
+    document.getElementById('btn-logout').title = 'Logado como ' + user.email;
     startLiveSync();
     estudos = await loadList('estudos');
     investimentos = await loadList('investimentos');
@@ -788,7 +797,7 @@ document.getElementById('btn-voltar-lista').addEventListener('click', ()=>{
 function updateReformaTotal(){
   const m2 = parseNumberBR(document.getElementById('f-metragem').value);
   const custoM2 = currencyValue(document.getElementById('f-reforma-m2'));
-  document.getElementById('f-reforma-total').textContent = fmtR(m2*custoM2);
+  setCurrencyValue(document.getElementById('f-reforma-total-input'), m2*custoM2);
 }
 document.getElementById('f-metragem').addEventListener('input', updateReformaTotal);
 document.getElementById('f-reforma-m2').addEventListener('input', updateReformaTotal);
@@ -802,6 +811,7 @@ function fillFormFrom(e){
   document.getElementById('f-nome').value = e ? (e.nome||'') : '';
   document.getElementById('f-endereco').value = e ? (e.endereco||'') : '';
   document.getElementById('f-fechamento').value = e ? (e.dataFechamento||'') : new Date().toISOString().slice(0,10);
+  document.getElementById('f-aceite-compra').value = e ? (e.dataAceiteCompra||'') : '';
   document.getElementById('f-metragem').value = e ? (e.metragem||'') : '';
   setCurrencyValue(document.getElementById('f-compra'), e ? e.valorCompra : 0);
   setCurrencyValue(document.getElementById('f-reforma-m2'), e ? e.reformaM2 : 0);
@@ -838,6 +848,7 @@ document.getElementById('btn-calcular-estudo').addEventListener('click', async (
   e.nome = document.getElementById('f-nome').value.trim();
   e.endereco = document.getElementById('f-endereco').value.trim();
   e.dataFechamento = document.getElementById('f-fechamento').value || null;
+  e.dataAceiteCompra = document.getElementById('f-aceite-compra').value || null;
   e.metragem = metragem;
   e.valorCompra = valorCompra;
   e.reformaM2 = custoM2;
@@ -1143,16 +1154,8 @@ function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i
 
 function showFieldHint(inp, text){
   const tip = document.getElementById('field-hint-tooltip');
-  tip.textContent = text;
+  tip.innerHTML = '<div style="font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">Previsto (default)</div>' + text;
   tip.hidden = false;
-  const rect = inp.getBoundingClientRect();
-  let left = rect.right + 10;
-  let top = rect.top + (rect.height/2) - 12;
-  const tipWidth = tip.offsetWidth || 160;
-  if(left + tipWidth > window.innerWidth - 8){ left = rect.left; top = rect.bottom + 6; }
-  if(left < 4) left = 4;
-  tip.style.left = left+'px';
-  tip.style.top = top+'px';
 }
 function hideFieldHint(){
   document.getElementById('field-hint-tooltip').hidden = true;
@@ -1350,6 +1353,7 @@ function buildInvForm(){
   const fin1 = currentInv.financInicial, fin2 = currentInv.financFinal;
 
   let compraFields = row('Dt fechamento verbal apto','compra.dataFechamento') +
+    row('Dt aceite compra','compra.dataAceiteCompra') +
     row('Dt assinatura CCV','compra.dataAssinaturaCCV') +
     row('Dt liberação sinal','compra.dataLiberacaoSinal','compra.valorSinal', 'R$') +
     row('Valor ITBI/cartório', null, 'compra.valorITBI', 'R$');
@@ -1442,7 +1446,7 @@ function buildInvForm(){
       const hints = computeDefaultHints();
       const h = hints[inp.dataset.path];
       if(h && h.value){
-        showFieldHint(inp, 'previsto: ' + (inp.dataset.hinttype==='date' ? h.value.toLocaleDateString('pt-BR') : fmtR(h.value)));
+        showFieldHint(inp, inp.dataset.hinttype==='date' ? h.value.toLocaleDateString('pt-BR') : fmtR(h.value));
       }
     });
     inp.addEventListener('blur', hideFieldHint);
