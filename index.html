@@ -120,6 +120,8 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
 .entry-table input.e-desc{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table .e-empty{visibility:hidden;}
+.entry-table .e-hint{font-size:11px;color:var(--accent);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !important;border-color:var(--warn) !important;font-weight:600;}
 .entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
 .despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-s);border:.5px dashed var(--line);}
 .despesas-block .desp-hdr{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
@@ -132,12 +134,16 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .tir-line-lbl{font-size:12.5px;color:var(--ink-soft);}
 .tir-line-val{font-family:sans-serif;font-size:24px;font-weight:700;color:var(--ink);}
 .tir-line-item.present .tir-line-val{color:var(--accent);}
+.icbtn-refresh{border:none;background:none;color:var(--ink-faint);font-size:16px;padding:2px 4px;line-height:1;}
+.icbtn-refresh:hover{color:var(--accent);}
 .back-link{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;display:inline-block;}
 .back-link:hover{color:var(--ink);}
 
 .inv-nome-destaque{font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);margin:0 0 4px;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:1000;padding:0;}
 .modal-overlay[hidden]{display:none !important;}
+#field-hint-tooltip{position:fixed;background:var(--ink);color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;z-index:2000;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+#field-hint-tooltip[hidden]{display:none !important;}
 #login-screen[hidden]{display:none !important;}
 .modal-panel{background:var(--panel);border-radius:18px 18px 0 0;padding:24px 16px 34px;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
@@ -340,12 +346,21 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
       <button class="back-link" id="btn-voltar-investimentos">&larr; Voltar aos investimentos</button>
       <div class="panel">
         <h3 id="inv-nome" class="inv-nome-destaque"></h3>
-        <p id="inv-endereco" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 22px;"></p>
+        <p id="inv-endereco" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 18px;"></p>
+
+        <div class="phase-block" id="block-estudo" style="background:var(--bg);border-radius:var(--radius);padding:16px 18px;margin-bottom:22px;">
+          <div class="phase-head" style="margin-bottom:8px;">
+            <h3 style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);">Estudo de viabilidade (na aprovação)</h3>
+            <button class="phase-collapse-btn" id="btn-collapse-estudo">Minimizar</button>
+          </div>
+          <div id="estudo-resumo-body"></div>
+        </div>
 
         <div class="tir-line">
           <div class="tir-line-item">
             <span class="tir-line-lbl">Default</span>
             <span class="tir-line-val" id="inv-tir-default">–</span>
+            <button class="icbtn-refresh" id="btn-recalc-default" title="Recalcular TIR default com a fórmula atual">↻</button>
           </div>
           <div class="tir-line-item present">
             <span class="tir-line-lbl">Real</span>
@@ -372,6 +387,8 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 
   </section>
 </main>
+
+<div id="field-hint-tooltip" hidden></div>
 
 <div id="ledger-modal" class="modal-overlay" hidden>
   <div class="modal-panel">
@@ -914,6 +931,8 @@ document.getElementById('btn-sim-fechado').addEventListener('click', async ()=>{
     estudoId: currentEstudo.id,
     nome: currentEstudo.nome,
     endereco: currentEstudo.endereco,
+    metragem: currentEstudo.metragem,
+    reformaM2: currentEstudo.reformaM2,
     valorCompra: matrixCompraVal,
     valorReformaTotal: matrixReformaVal,
     condominio: currentEstudo.condominio,
@@ -922,6 +941,7 @@ document.getElementById('btn-sim-fechado').addEventListener('click', async ()=>{
     financFinal: financFinal,
     dataFechamentoDefault: currentEstudo.dataFechamento || new Date().toISOString().slice(0,10),
     compra: {}, obra: { liberacoes: [] }, venda: {},
+    ui: { compraCollapsed:false, estudoCollapsed:false },
     createdAt: Date.now()
   };
   inv.tirDefault = presenteTIR(virtualDefaultInv(inv));
@@ -960,7 +980,7 @@ function renderInvestimentos(){
         <div class="meta">${inv.endereco||'—'} · ${prog.preenchidos}/${prog.total} dados lançados</div>
       </div>
       <div class="right">
-        <span class="tir">${fmtPct(presenteTIR(inv))}</span>
+        <span class="tir">${buildCashflowLines(inv).lines.some(l=>l.real) ? fmtPct(presenteTIR(inv)) : '—'}</span>
         <button class="btn ghost del-btn" data-id="${inv.id}" title="Excluir" style="padding:6px 9px;font-size:15px;color:var(--ink-soft);">&times;</button>
       </div>`;
     div.querySelector('.del-btn').addEventListener('click', async (ev)=>{
@@ -1114,12 +1134,79 @@ function virtualDefaultInv(inv){
    alinhados sempre nas mesmas colunas (label | data | valor)
    ============================================================ */
 function row(label, datePath, valuePath, placeholder){
-  const dateCell = datePath ? `<input type="date" data-path="${datePath}">` : `<div class="e-empty"></div>`;
-  const valCell = valuePath ? `<input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" placeholder="${placeholder||''}">` : `<div class="e-empty"></div>`;
+  const dateCell = datePath ? `<input type="date" data-path="${datePath}" data-hinttype="date">` : `<div class="e-empty"></div>`;
+  const valCell = valuePath ? `<input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" data-hinttype="money" placeholder="${placeholder||''}">` : `<div class="e-empty"></div>`;
   return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div>`;
 }
 function getPath(obj, path){ return path.split('.').reduce((o,k)=>(o? o[k] : undefined), obj); }
 function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i=0;i<ks.length-1;i++){ if(!o[ks[i]]) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
+
+function showFieldHint(inp, text){
+  const tip = document.getElementById('field-hint-tooltip');
+  tip.textContent = text;
+  tip.hidden = false;
+  const rect = inp.getBoundingClientRect();
+  let left = rect.right + 10;
+  let top = rect.top + (rect.height/2) - 12;
+  const tipWidth = tip.offsetWidth || 160;
+  if(left + tipWidth > window.innerWidth - 8){ left = rect.left; top = rect.bottom + 6; }
+  if(left < 4) left = 4;
+  tip.style.left = left+'px';
+  tip.style.top = top+'px';
+}
+function hideFieldHint(){
+  document.getElementById('field-hint-tooltip').hidden = true;
+}
+
+/** valores/datas previstos pelo default para cada campo — exibidos como dica ao focar */
+function computeDefaultHints(){
+  const inv = currentInv;
+  const dInv = virtualDefaultInv(inv);
+  const dates = projectDates(dInv);
+  const compraVal = inv.valorCompra, vendaVal = inv.valorVenda, reformaVal = inv.valorReformaTotal;
+  const custoVendaPct = 0.135;
+  const H = {};
+  H['compra.dataFechamento'] = {type:'date', value: toDate(dInv.compra.dataFechamento)};
+  H['compra.dataAssinaturaCCV'] = {type:'date', value: dates.sinalDate};
+  H['compra.dataLiberacaoSinal'] = {type:'date', value: dates.sinalDate};
+  H['compra.valorSinal'] = {type:'money', value: compraVal*0.10};
+  H['compra.valorITBI'] = {type:'money', value: compraVal*0.04};
+  if(inv.financInicial){
+    H['compra.dataLiberacaoParcelaIntermediaria'] = {type:'date', value: dates.parcIntermediariaDate};
+    H['compra.valorParcelaIntermediaria'] = {type:'money', value: compraVal*0.20};
+    H['compra.dataAssinaturaEmprestimo'] = {type:'date', value: dates.parcIntermediariaDate};
+    H['compra.dataLiberacaoParcelaFinal'] = {type:'date', value: dates.parcFinalDate};
+    H['compra.valorParcelaFinal'] = {type:'money', value: compraVal*0.70};
+  } else {
+    H['compra.dataLiberacaoParcelaFinal'] = {type:'date', value: dates.parcFinalDate};
+    H['compra.valorParcelaFinal'] = {type:'money', value: compraVal*0.90};
+  }
+  H['compra.dataRecebimentoChaves'] = {type:'date', value: dates.chavesDate};
+  H['compra.dataConclusaoProjeto'] = {type:'date', value: dates.projetoDate};
+  H['compra.dataConclusaoOrcamentoExecutivo'] = {type:'date', value: dates.orcamentoDate};
+  H['compra.valorOrcamentoExecutivo'] = {type:'money', value: reformaVal};
+  H['compra.dataLiberacaoReformaCondominio'] = {type:'date', value: dates.projetoDate};
+  H['obra.dataInicioReforma'] = {type:'date', value: dates.inicioObraDate};
+  H['obra.dataPrevisaoTermino'] = {type:'date', value: dates.fimObraDate};
+  H['obra.dataConclusao'] = {type:'date', value: dates.fimObraDate};
+  H['venda.dataLiberacaoCorretores'] = {type:'date', value: dates.liberVendaDate};
+  H['venda.dataPropostaAceita'] = {type:'date', value: dates.propostaDate};
+  H['venda.valorVenda'] = {type:'money', value: vendaVal};
+  H['venda.dataAssinaturaCCV'] = {type:'date', value: dates.vendaSinalDate};
+  H['venda.dataRecebimentoSinal'] = {type:'date', value: dates.vendaSinalDate};
+  H['venda.valorRecebimentoSinal'] = {type:'money', value: vendaVal*0.10};
+  if(inv.financFinal){
+    H['venda.dataRecebimentoParcelaIntermediaria'] = {type:'date', value: dates.vendaParcIntermediariaDate};
+    H['venda.valorRecebimentoParcelaIntermediaria'] = {type:'money', value: vendaVal*0.20};
+    H['venda.dataAssinaturaFinanciamento'] = {type:'date', value: dates.vendaParcIntermediariaDate};
+    H['venda.dataRecebimentoParcelaFinal'] = {type:'date', value: dates.vendaParcFinalDate};
+    H['venda.valorRecebimentoParcelaFinal'] = {type:'money', value: vendaVal*0.70 - vendaVal*custoVendaPct};
+  } else {
+    H['venda.dataRecebimentoParcelaFinal'] = {type:'date', value: dates.vendaParcFinalDate};
+    H['venda.valorRecebimentoParcelaFinal'] = {type:'money', value: vendaVal*0.90 - vendaVal*custoVendaPct};
+  }
+  return H;
+}
 
 let currentInv = null;
 
@@ -1128,19 +1215,49 @@ document.getElementById('btn-voltar-investimentos').addEventListener('click', ()
   document.getElementById('investimentos-home').hidden = false;
 });
 
+document.getElementById('btn-recalc-default').addEventListener('click', async ()=>{
+  currentInv.tirDefault = presenteTIR(virtualDefaultInv(currentInv));
+  document.getElementById('inv-tir-default').textContent = fmtPct(currentInv.tirDefault);
+  buildEstudoResumo();
+  await saveList('investimentos', investimentos);
+});
+
 function openInvestimentoDetail(inv){
   currentInv = inv;
   ensureInvStruct(inv);
   if(!inv.compra.outrasDespesas) inv.compra.outrasDespesas = [];
-  if(!inv.ui) inv.ui = { compraCollapsed:false };
+  if(!inv.ui) inv.ui = { compraCollapsed:false, estudoCollapsed:false };
+  if(inv.ui.estudoCollapsed===undefined) inv.ui.estudoCollapsed = false;
   document.getElementById('investimentos-home').hidden = true;
   document.getElementById('investimento-detail').hidden = false;
   document.getElementById('inv-nome').textContent = inv.nome || '(sem nome)';
   document.getElementById('inv-endereco').textContent = `${inv.endereco||'—'} · Financ. inicial: ${inv.financInicial?'sim':'não'} · Financ. final: ${inv.financFinal?'sim':'não'}`;
   document.getElementById('inv-tir-default').textContent = fmtPct(inv.tirDefault);
+  buildEstudoResumo();
   buildInvForm();
   updateInvPresente();
 }
+
+function buildEstudoResumo(){
+  const inv = currentInv;
+  const body = document.getElementById('estudo-resumo-body');
+  const block = document.getElementById('block-estudo');
+  block.classList.toggle('collapsed', !!inv.ui.estudoCollapsed);
+  document.getElementById('btn-collapse-estudo').textContent = inv.ui.estudoCollapsed ? 'Expandir' : 'Minimizar';
+
+  const linhaResumo = `${inv.metragem?inv.metragem+' m² · ':''}Compra ${fmtR(inv.valorCompra)} · Reforma ${fmtR(inv.valorReformaTotal)}${inv.reformaM2?' ('+fmtR(inv.reformaM2)+'/m²)':''} · Venda ${fmtR(inv.valorVenda)}`;
+  const tirs = tirByPrazo(inv, inv.financInicial, inv.financFinal, inv.valorCompra, inv.valorReformaTotal, inv.valorVenda);
+  const matrizHtml = `<table class="tir-matrix" style="width:100%;max-width:420px;margin-top:10px;">
+      <thead><tr><th>Plus</th><th>Default</th><th>Minus</th></tr></thead>
+      <tbody><tr>${SCEN.map((s,i)=>`<td class="${tirClass(tirs[i])}${i===1?' base':''}"><div class="cell" style="font-size:15px;padding:10px 6px;">${fmtPct(tirs[i])}</div></td>`).join('')}</tr></tbody>
+    </table>`;
+  body.innerHTML = `<div class="phase-body"><p style="font-size:13px;color:var(--ink);margin:0 0 4px;">${linhaResumo}</p>${matrizHtml}</div>`;
+}
+document.getElementById('btn-collapse-estudo').addEventListener('click', async ()=>{
+  currentInv.ui.estudoCollapsed = !currentInv.ui.estudoCollapsed;
+  buildEstudoResumo();
+  await saveList('investimentos', investimentos);
+});
 
 function realTIR(inv){
   const { lines } = buildCashflowLines(inv);
@@ -1232,7 +1349,7 @@ function buildInvForm(){
   const wrap = document.getElementById('inv-phases');
   const fin1 = currentInv.financInicial, fin2 = currentInv.financFinal;
 
-  let compraFields = row('Dt encontro apto','compra.dataFechamento') +
+  let compraFields = row('Dt fechamento verbal apto','compra.dataFechamento') +
     row('Dt assinatura CCV','compra.dataAssinaturaCCV') +
     row('Dt liberação sinal','compra.dataLiberacaoSinal','compra.valorSinal', 'R$') +
     row('Valor ITBI/cartório', null, 'compra.valorITBI', 'R$');
@@ -1318,6 +1435,17 @@ function buildInvForm(){
       updateInvPresente();
       await saveList('investimentos', investimentos);
     });
+  });
+
+  wrap.querySelectorAll('input[data-hinttype]').forEach(inp=>{
+    inp.addEventListener('focus', ()=>{
+      const hints = computeDefaultHints();
+      const h = hints[inp.dataset.path];
+      if(h && h.value){
+        showFieldHint(inp, 'previsto: ' + (inp.dataset.hinttype==='date' ? h.value.toLocaleDateString('pt-BR') : fmtR(h.value)));
+      }
+    });
+    inp.addEventListener('blur', hideFieldHint);
   });
 
   document.getElementById('btn-add-liber').addEventListener('click', async ()=>{
@@ -1423,8 +1551,8 @@ function renderDespesasRows(){
 
 function updateInvPresente(){
   const tir = presenteTIR(currentInv);
-  document.getElementById('inv-tir-presente').textContent = fmtPct(tir);
   const hasReal = buildCashflowLines(currentInv).lines.some(l=>l.real);
+  document.getElementById('inv-tir-presente').textContent = hasReal ? fmtPct(tir) : '—';
   if(hasReal) recordTirHistory(currentInv, tir);
   renderTirChart();
 }
