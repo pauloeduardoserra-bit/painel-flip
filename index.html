@@ -4,45 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel de Investimentos — Flip</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F4F5F1;
+  --bg:#F5F4F0;
   --panel:#FFFFFF;
-  --ink:#16232E;
-  --ink-soft:#54626D;
-  --line:#D8DCD3;
-  --line-soft:#E7E9E2;
-  --accent:#0E5C52;
-  --accent-soft:#DCEAE6;
-  --good:#1E7A3D;
-  --good-bg:#E4F3E7;
-  --warn:#9A6B0A;
-  --warn-bg:#FBF0DA;
-  --bad:#B23A2E;
-  --bad-bg:#FBE7E3;
-  --radius:10px;
-  font-family:'Inter',sans-serif;
+  --ink:#1a1a1a;
+  --ink-soft:#666;
+  --ink-faint:#999;
+  --line:rgba(0,0,0,0.09);
+  --line-soft:rgba(0,0,0,0.06);
+  --accent:#3C3489;
+  --accent-mid:#534AB7;
+  --accent-soft:#EEEDFE;
+  --good:#0F6E56;
+  --good-bg:#E1F5EE;
+  --warn:#BA7517;
+  --warn-bg:#FAEEDA;
+  --bad:#D85A30;
+  --bad-bg:#FAECE7;
+  --radius:14px;
+  --radius-s:8px;
+  font-family:sans-serif;
 }
-*{box-sizing:border-box;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
-body{padding:0 0 80px;}
-h1,h2,h3{font-family:'Source Serif 4',serif;font-weight:600;margin:0;}
-.mono{font-family:'IBM Plex Mono',monospace;}
+body{padding:0 0 80px;font-family:sans-serif;}
+h1,h2,h3{font-family:Georgia,serif;font-weight:600;margin:0;}
+.mono{font-family:sans-serif;}
 button{font-family:inherit;cursor:pointer;}
 
 /* header */
-header.app{padding:28px 32px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:relative;}
+header.app{padding:28px 32px 20px;background:var(--accent);position:relative;}
 .brand{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;}
-.brand .mark{width:30px;height:30px;border:1.5px solid var(--ink);border-radius:3px;position:relative;flex-shrink:0;}
-.brand .mark::before{content:'';position:absolute;left:6px;right:6px;top:9px;height:1px;background:var(--ink);}
-.brand .mark::after{content:'';position:absolute;left:6px;right:6px;top:14px;height:1px;background:var(--ink);}
-.brand h1{font-size:19px;letter-spacing:.01em;}
-.brand .sub{font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:.03em;}
-nav.tabs{display:flex;gap:4px;}
-nav.tabs button{background:none;border:1px solid transparent;padding:9px 16px;font-size:13.5px;font-weight:500;color:var(--ink-soft);border-radius:7px 7px 0 0;}
-nav.tabs button.active{color:var(--ink);border-color:var(--line) var(--line) var(--panel);background:var(--bg);}
+.brand .mark{width:30px;height:30px;border:1.5px solid #fff;border-radius:50%;position:relative;flex-shrink:0;}
+.brand .mark::before{content:'';position:absolute;left:6px;right:6px;top:9px;height:1px;background:#fff;}
+.brand .mark::after{content:'';position:absolute;left:6px;right:6px;top:14px;height:1px;background:#fff;}
+.brand h1{font-size:19px;letter-spacing:.01em;color:#fff;font-family:Georgia,serif;}
+.brand .sub{font-size:11px;color:rgba(255,255,255,0.65);font-family:sans-serif;letter-spacing:.1em;text-transform:uppercase;}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;}
+nav.tabs button{background:rgba(255,255,255,0.12);border:1px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.75);border-radius:20px;white-space:nowrap;}
+nav.tabs button.active{color:var(--accent);background:#fff;font-weight:600;}
+
 
 main{max-width:1080px;margin:0 auto;padding:28px 32px;}
 section.view{display:none;}
@@ -50,89 +52,97 @@ section.view.active{display:block;}
 
 .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
 .toolbar h2{font-size:22px;}
-.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 18px;border-radius:7px;font-size:13.5px;font-weight:500;}
-.btn.ghost{background:none;color:var(--ink);}
-.btn.subtle{border-color:var(--line);background:var(--panel);color:var(--ink-soft);}
-.btn.danger{border-color:var(--bad);color:var(--bad);background:none;}
+.btn{border:none;background:var(--accent);color:#fff;padding:11px 20px;border-radius:var(--radius);font-size:14px;font-weight:500;}
+.btn.ghost{background:none;color:var(--accent);border:1.5px solid var(--accent);}
+.btn.subtle{border:1px solid var(--line);background:var(--panel);color:var(--ink-soft);border-radius:var(--radius);}
+.btn.danger{border:1.5px solid var(--bad);color:var(--bad);background:none;}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
 
 /* card list */
 .card-list{display:flex;flex-direction:column;gap:10px;}
-.item-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s;}
+.item-card{background:var(--panel);border:.5px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:pointer;}
 .item-card:hover{border-color:var(--accent);}
 .item-card .main{min-width:0;}
-.item-card .name{font-weight:600;font-size:15px;margin-bottom:3px;}
+.item-card .name{font-weight:600;font-size:15px;margin-bottom:3px;font-family:sans-serif;}
 .item-card .meta{font-size:12.5px;color:var(--ink-soft);}
 .item-card .right{display:flex;align-items:center;gap:14px;flex-shrink:0;}
-.item-card .tir{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:500;}
+.item-card .tir{font-family:sans-serif;font-size:17px;font-weight:600;}
 .badge{font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:.02em;white-space:nowrap;}
 .badge.analise{background:var(--warn-bg);color:var(--warn);}
 .badge.fechado{background:var(--accent-soft);color:var(--accent);}
 .badge.descartado{background:var(--line-soft);color:var(--ink-soft);}
-.empty-state{border:1px dashed var(--line);border-radius:var(--radius);padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
+.empty-state{border:.5px dashed var(--line);border-radius:var(--radius);padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
 
 /* form */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+.panel{background:var(--panel);border:.5px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
 .form-grid .span2{grid-column:1/-1;}
-label.field{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;}
-input[type=text],input[type=number]{width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);}
-input[type=text]{font-family:'Inter',sans-serif;}
+label.field{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;font-family:sans-serif;}
+input[type=text],input[type=number]{width:100%;border:.5px solid var(--line);border-radius:var(--radius-s);padding:9px 11px;font-size:14px;font-family:sans-serif;background:var(--bg);color:var(--ink);}
 input:focus{outline:2px solid var(--accent);outline-offset:1px;}
 .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
 .derived{font-size:12.5px;color:var(--ink-soft);margin-top:5px;}
-.derived b{color:var(--ink);font-family:'IBM Plex Mono',monospace;}
+.derived b{color:var(--ink);font-family:sans-serif;}
 .form-actions{display:flex;gap:10px;justify-content:flex-end;}
 
 /* matrix */
 .matrix-wrap{margin-top:8px;}
 .fin-toggles{display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap;}
 .fin-toggle label{font-size:12.5px;color:var(--ink-soft);font-weight:500;display:block;margin-bottom:6px;}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;}
-.seg button{border:none;background:var(--panel);padding:7px 14px;font-size:12.5px;color:var(--ink-soft);}
-.seg button.on{background:var(--ink);color:#fff;}
-table.tir-matrix{border-collapse:collapse;width:100%;}
-table.tir-matrix th,table.tir-matrix td{border:1px solid var(--line);padding:0;text-align:center;}
-table.tir-matrix th{background:var(--bg);font-size:11.5px;font-weight:600;color:var(--ink-soft);padding:9px 6px;text-transform:uppercase;letter-spacing:.03em;}
+.seg{display:inline-flex;gap:8px;}
+.seg button{border:.5px solid var(--line);background:var(--bg);padding:10px 16px;font-size:13px;color:var(--ink);border-radius:var(--radius-s);}
+.seg button.on{border:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600;}
+table.tir-matrix{border-collapse:separate;border-spacing:0;width:100%;}
+table.tir-matrix th,table.tir-matrix td{border:.5px solid var(--line);padding:0;text-align:center;}
+table.tir-matrix th{background:var(--bg);font-size:11px;font-weight:600;color:var(--ink-faint);padding:9px 6px;letter-spacing:.05em;font-family:sans-serif;}
 table.tir-matrix th.corner{background:var(--panel);border:none;}
-table.tir-matrix td .cell{padding:16px 6px;font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;}
+table.tir-matrix td .cell{padding:16px 6px;font-family:sans-serif;font-size:18px;font-weight:600;}
 table.tir-matrix td.good .cell{background:var(--good-bg);color:var(--good);}
 table.tir-matrix td.warn .cell{background:var(--warn-bg);color:var(--warn);}
 table.tir-matrix td.bad .cell{background:var(--bad-bg);color:var(--bad);}
 table.tir-matrix td.base{position:relative;}
-table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;left:0;right:0;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;opacity:.55;font-family:'Inter',sans-serif;}
+table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;left:0;right:0;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;opacity:.5;font-family:sans-serif;}
 .legend-row{display:flex;gap:16px;margin-top:14px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap;}
 .legend-row .sw{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px;}
-.threshold-note{font-size:12px;color:var(--ink-soft);margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+.threshold-note{font-size:12px;color:var(--ink-soft);margin-top:12px;padding-top:12px;border-top:.5px dashed var(--line);}
 
-.decision-row{display:flex;gap:12px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line);align-items:center;flex-wrap:wrap;}
+.decision-row{display:flex;gap:12px;margin-top:22px;padding-top:20px;border-top:.5px solid var(--line);align-items:center;flex-wrap:wrap;}
 .decision-row .q{font-size:14px;font-weight:500;margin-right:auto;}
 
 /* investimento detail */
 .phase-block{margin-bottom:26px;}
 .phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.phase-head h3{font-size:15px;}
+.phase-head h3.phase-title{font-size:19px;font-weight:700;letter-spacing:.04em;font-family:sans-serif;}
 .entry-table{display:grid;grid-template-columns:minmax(160px,1fr) 148px 148px 30px;row-gap:3px;column-gap:12px;align-items:center;}
 .entry-table .e-label{font-size:12px;color:var(--ink-soft);padding:5px 0;}
-.entry-table input[type=date]{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);width:100%;}
-.entry-table input.money-mask{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
-.entry-table input.e-desc{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
+.entry-table input[type=date]{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;}
+.entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
+.entry-table input.e-desc{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table .e-empty{visibility:hidden;}
 .entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
-.despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:8px;border:1px dashed var(--line);}
+.despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-s);border:.5px dashed var(--line);}
 .despesas-block .desp-hdr{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
 .despesas-block .entry-table{grid-template-columns:minmax(140px,1fr) 140px 130px 26px;}
-.phase-collapse-btn{border:1px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:6px;font-size:11.5px;color:var(--ink-soft);}
+.phase-collapse-btn{border:.5px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:20px;font-size:11.5px;color:var(--ink-soft);}
 .phase-block.collapsed .phase-body{display:none;}
 @media (max-width:720px){ .entry-table, .despesas-block .entry-table{grid-template-columns:1fr 1fr 1fr 24px;} }
 .compare-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
-.compare-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+.compare-card{background:var(--panel);border:.5px solid var(--line);border-radius:var(--radius);padding:18px;}
 .compare-card .lbl{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
-.compare-card .tir{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;}
-.compare-card.present{border-color:var(--accent);}
+.compare-card .tir{font-family:sans-serif;font-size:28px;font-weight:600;}
+.compare-card.present{border:2px solid var(--accent);}
 .back-link{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;display:inline-block;}
 .back-link:hover{color:var(--ink);}
 
+.inv-nome-destaque{font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);margin:0 0 4px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:1000;padding:0;}
+.modal-panel{background:var(--panel);border-radius:18px 18px 0 0;padding:24px 16px 34px;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.modal-header h3{font-size:17px;}
+@media (min-width:641px){
+  .modal-overlay{align-items:center;padding:20px;}
+  .modal-panel{border-radius:18px;}
+}
 @media (max-width:640px){
   .form-grid{grid-template-columns:1fr;}
   .compare-cards{grid-template-columns:1fr;}
@@ -143,16 +153,16 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 </head>
 <body>
 
-<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:32px;max-width:360px;width:100%;">
+<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--accent);">
+  <div style="background:var(--panel);border-radius:18px;padding:32px;max-width:360px;width:100%;">
     <div class="brand" style="margin-bottom:22px;">
-      <span class="mark"></span>
-      <h1 style="font-size:19px;">Painel de Investimentos</h1>
+      <span class="mark" style="border-color:var(--accent);"></span>
+      <h1 style="font-size:19px;color:var(--accent);">Painel de Investimentos</h1>
     </div>
     <label class="field">E-mail</label>
-    <input type="text" id="login-email" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px;margin-bottom:14px;background:var(--bg);color:var(--ink);">
+    <input type="text" id="login-email" style="width:100%;border:.5px solid var(--line);border-radius:var(--radius-s);padding:9px 11px;font-size:14px;margin-bottom:14px;background:var(--bg);color:var(--ink);">
     <label class="field">Senha</label>
-    <input type="password" id="login-password" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px;margin-bottom:8px;background:var(--bg);color:var(--ink);">
+    <input type="password" id="login-password" style="width:100%;border:.5px solid var(--line);border-radius:var(--radius-s);padding:9px 11px;font-size:14px;margin-bottom:8px;background:var(--bg);color:var(--ink);">
     <p id="login-error" style="color:var(--bad);font-size:12.5px;min-height:16px;margin:0 0 10px;"></p>
     <button class="btn" id="btn-login" style="width:100%;margin-bottom:10px;">Entrar</button>
     <button class="btn ghost" id="btn-login-reset" style="width:100%;font-size:12px;">Esqueci minha senha</button>
@@ -168,7 +178,10 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
       <h1>Painel de Investimentos</h1>
       <span class="sub">FLIP · TIR</span>
     </div>
-    <button class="btn ghost" id="btn-logout" style="font-size:12px;white-space:nowrap;flex-shrink:0;">Sair (<span id="user-email-label"></span>)</button>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button class="btn subtle" id="btn-export-backup" style="font-size:12px;white-space:nowrap;">Exportar backup</button>
+      <button class="btn ghost" id="btn-logout" style="font-size:12px;white-space:nowrap;">Sair (<span id="user-email-label"></span>)</button>
+    </div>
   </div>
   <nav class="tabs">
     <button data-tab="estudos" class="active">Estudos de viabilidade</button>
@@ -208,7 +221,7 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
           <input type="text" id="f-endereco" placeholder="Rua, número, bairro">
         </div>
         <div>
-          <label class="field">Data de fechamento do negócio (prevista) <span style="font-weight:400">— data zero do caixa</span></label>
+          <label class="field">Data de encontro do apto <span style="font-weight:400">— data zero do caixa</span></label>
           <input type="date" id="f-fechamento">
         </div>
         <div>
@@ -322,12 +335,12 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
     <div id="investimento-detail" hidden>
       <button class="back-link" id="btn-voltar-investimentos">&larr; Voltar aos investimentos</button>
       <div class="panel">
-        <h3 id="inv-nome" style="font-size:18px;margin-bottom:2px;"></h3>
+        <h3 id="inv-nome" class="inv-nome-destaque"></h3>
         <p id="inv-endereco" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 22px;"></p>
 
         <div class="compare-cards">
           <div class="compare-card">
-            <div class="lbl">TIR situação default (100% projetada, a partir da data de fechamento prevista)</div>
+            <div class="lbl">TIR situação default (100% projetada, a partir da data de encontro do apto)</div>
             <div class="tir" id="inv-tir-default">–</div>
           </div>
           <div class="compare-card present">
@@ -336,7 +349,17 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
           </div>
         </div>
 
-        <button class="btn subtle" id="btn-toggle-cronograma" style="margin-bottom:22px;">Abrir cronograma previsto (default) em nova janela</button>
+        <div style="margin-bottom:24px;">
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 8px;font-weight:500;">Evolução da TIR real ao longo do tempo</p>
+          <div style="position:relative;height:180px;">
+            <canvas id="tir-chart"></canvas>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;">
+          <button class="btn subtle" id="btn-mov-default">Movimento de Caixa (default)</button>
+          <button class="btn subtle" id="btn-mov-real">Movimento de Caixa (real)</button>
+        </div>
 
         <div id="inv-phases"></div>
       </div>
@@ -344,8 +367,26 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 
   </section>
 </main>
+
+<div id="ledger-modal" class="modal-overlay" hidden>
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h3 id="ledger-modal-title"></h3>
+      <button class="btn ghost" id="btn-close-ledger" style="font-size:20px;padding:2px 10px;">&times;</button>
+    </div>
+    <p id="ledger-modal-sub" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;"></p>
+    <div style="overflow:auto;max-height:60vh;">
+      <table class="tir-matrix" style="width:100%;">
+        <thead><tr><th style="text-align:left;">Data</th><th style="text-align:left;">Lançamento</th><th>Valor</th></tr></thead>
+        <tbody id="ledger-modal-body"></tbody>
+      </table>
+    </div>
+    <button class="btn" id="btn-close-ledger-2" style="margin-top:16px;">Fechar</button>
+  </div>
+</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -628,6 +669,15 @@ document.getElementById('btn-login-reset').addEventListener('click', async ()=>{
   } catch(e){ errEl.style.color='var(--bad)'; errEl.textContent = 'Não foi possível enviar: ' + e.message; }
 });
 document.getElementById('btn-logout').addEventListener('click', ()=> auth.signOut());
+document.getElementById('btn-export-backup').addEventListener('click', ()=>{
+  const payload = { exportadoEm: new Date().toISOString(), estudos, investimentos };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `backup-painel-flip-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
 
 auth.onAuthStateChanged(async (user)=>{
   if(user){
@@ -666,12 +716,13 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
    ============================================================ */
 function renderEstudos(){
   const list = document.getElementById('estudos-list');
-  if(estudos.length===0){ list.innerHTML = '<div class="empty-state">Nenhum estudo de viabilidade ainda. Clique em "+ Novo estudo" para começar.</div>'; return; }
+  const visiveis = estudos.filter(e=>e.status!=='fechado');
+  if(visiveis.length===0){ list.innerHTML = '<div class="empty-state">Nenhum estudo de viabilidade ainda. Clique em "+ Novo estudo" para começar.</div>'; return; }
   list.innerHTML = '';
-  estudos.slice().reverse().forEach(e=>{
+  visiveis.slice().reverse().forEach(e=>{
     const div = document.createElement('div');
     div.className='item-card';
-    const badgeLabel = e.status==='analise' ? 'Em análise' : (e.status==='fechado' ? 'Fechado' : 'Descartado');
+    const badgeLabel = e.status==='analise' ? 'Em análise' : 'Descartado';
     div.innerHTML = `<div class="main">
         <div class="name">${e.nome || '(sem nome)'}</div>
         <div class="meta">${e.endereco || '—'} · ${e.metragem||0} m²</div>
@@ -869,6 +920,7 @@ document.getElementById('btn-sim-fechado').addEventListener('click', async ()=>{
     createdAt: Date.now()
   };
   inv.tirDefault = presenteTIR(virtualDefaultInv(inv));
+  inv.tirHistory = [{ts: inv.dataFechamentoDefault, tir: inv.tirDefault}];
   investimentos.push(inv);
   await saveList('investimentos', investimentos);
   renderInvestimentos();
@@ -965,8 +1017,16 @@ function projectDates(inv){
   } else {
     vendaParcFinalDate = toDate(v.dataRecebimentoParcelaFinal) || addDays(vendaSinalDate, PRAZOS.venda_sem.parc2_chaves[1]);
   }
+  const real = {
+    sinal: !!(c.dataLiberacaoSinal || c.dataAssinaturaCCV),
+    parcIntermediaria: !!(c.dataLiberacaoParcelaIntermediaria || c.dataAssinaturaEmprestimo),
+    parcFinal: !!c.dataLiberacaoParcelaFinal,
+    vendaSinal: !!(v.dataRecebimentoSinal || v.dataAssinaturaCCV),
+    vendaParcIntermediaria: !!(v.dataRecebimentoParcelaIntermediaria || v.dataAssinaturaFinanciamento),
+    vendaParcFinal: !!v.dataRecebimentoParcelaFinal
+  };
   return { anchor, sinalDate, parcIntermediariaDate, parcFinalDate, chavesDate, projetoDate, orcamentoDate,
-    inicioObraDate, fimObraDate, liberVendaDate, propostaDate, vendaSinalDate, vendaParcIntermediariaDate, vendaParcFinalDate };
+    inicioObraDate, fimObraDate, liberVendaDate, propostaDate, vendaSinalDate, vendaParcIntermediariaDate, vendaParcFinalDate, real };
 }
 
 /** saldo da reforma ainda não liberado: redistribuído em parcelas a cada 20 dias
@@ -975,7 +1035,7 @@ function reformaOutflows(inv, dates){
   const c = inv.compra, o = inv.obra;
   const totalBudget = (c.valorOrcamentoExecutivo>0 ? c.valorOrcamentoExecutivo : inv.valorReformaTotal);
   const liberacoes = (o.liberacoes||[]).filter(l=>l.data && l.valor>0);
-  const outflows = liberacoes.map(l=>({date:toDate(l.data), amt:l.valor}));
+  const outflows = liberacoes.map(l=>({date:toDate(l.data), amt:l.valor, real:true}));
   const sumLiberado = liberacoes.reduce((s,l)=>s+l.valor,0);
   const remaining = Math.max(0, totalBudget - sumLiberado);
   if(remaining>0){
@@ -985,7 +1045,7 @@ function reformaOutflows(inv, dates){
     if(remDays<1) remDays=1;
     const nParc = Math.max(1, Math.round(remDays/20));
     for(let i=0;i<nParc;i++){
-      outflows.push({date: addDays(lastDate, (i+1)*remDays/nParc), amt: remaining/nParc});
+      outflows.push({date: addDays(lastDate, (i+1)*remDays/nParc), amt: remaining/nParc, real:false});
     }
   }
   return outflows;
@@ -1001,27 +1061,27 @@ function buildCashflowLines(inv){
   const lines = [];
 
   const sinalVal = (c.valorSinal>0?c.valorSinal:compraVal*0.10) + (c.valorITBI>0?c.valorITBI:compraVal*0.04);
-  lines.push({label:'Sinal (10%) + ITBI/cartório', date:dates.sinalDate, amt:-sinalVal});
+  lines.push({label:'Sinal (10%) + ITBI/cartório', date:dates.sinalDate, amt:-sinalVal, real:dates.real.sinal});
   if(inv.financInicial){
-    lines.push({label:'Parcela intermediária (20%)', date:dates.parcIntermediariaDate, amt:-(c.valorParcelaIntermediaria>0?c.valorParcelaIntermediaria:compraVal*0.20)});
-    lines.push({label:'Parcela final (70%)', date:dates.parcFinalDate, amt:-(c.valorParcelaFinal>0?c.valorParcelaFinal:compraVal*0.70)});
+    lines.push({label:'Parcela intermediária (20%)', date:dates.parcIntermediariaDate, amt:-(c.valorParcelaIntermediaria>0?c.valorParcelaIntermediaria:compraVal*0.20), real:dates.real.parcIntermediaria});
+    lines.push({label:'Parcela final (70%)', date:dates.parcFinalDate, amt:-(c.valorParcelaFinal>0?c.valorParcelaFinal:compraVal*0.70), real:dates.real.parcFinal});
   } else {
-    lines.push({label:'Parcela final (90%)', date:dates.parcFinalDate, amt:-(c.valorParcelaFinal>0?c.valorParcelaFinal:compraVal*0.90)});
+    lines.push({label:'Parcela final (90%)', date:dates.parcFinalDate, amt:-(c.valorParcelaFinal>0?c.valorParcelaFinal:compraVal*0.90), real:dates.real.parcFinal});
   }
-  reformaOutflows(inv, dates).forEach((o,i)=>lines.push({label:`Parcela de reforma`, date:o.date, amt:-o.amt}));
-  (c.outrasDespesas||[]).filter(d=>d.data && d.valor>0).forEach(d=>lines.push({label:d.descricao||'Outra despesa', date:toDate(d.data), amt:-d.valor}));
+  reformaOutflows(inv, dates).forEach((o,i)=>lines.push({label:`Parcela de reforma`, date:o.date, amt:-o.amt, real:o.real}));
+  (c.outrasDespesas||[]).filter(d=>d.data && d.valor>0).forEach(d=>lines.push({label:d.descricao||'Outra despesa', date:toDate(d.data), amt:-d.valor, real:true}));
   {
     let d = dates.chavesDate;
     const end = dates.vendaParcFinalDate;
-    while(d < end){ d = addDays(d,30); if(d>end) d=end; lines.push({label:'Condomínio', date:new Date(d), amt:-inv.condominio}); }
+    while(d < end){ d = addDays(d,30); if(d>end) d=end; lines.push({label:'Condomínio', date:new Date(d), amt:-inv.condominio, real:false}); }
   }
   const sinalV = v.valorRecebimentoSinal>0? v.valorRecebimentoSinal : vendaValBase*0.10;
-  lines.push({label:'Recebimento sinal venda (10%)', date:dates.vendaSinalDate, amt:sinalV});
+  lines.push({label:'Recebimento sinal venda (10%)', date:dates.vendaSinalDate, amt:sinalV, real:dates.real.vendaSinal});
   if(inv.financFinal){
-    lines.push({label:'Recebimento parcela intermediária venda (20%)', date:dates.vendaParcIntermediariaDate, amt:(v.valorRecebimentoParcelaIntermediaria>0? v.valorRecebimentoParcelaIntermediaria : vendaValBase*0.20)});
-    lines.push({label:'Recebimento parcela final venda (70%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.70) - vendaValBase*custoVendaPct});
+    lines.push({label:'Recebimento parcela intermediária venda (20%)', date:dates.vendaParcIntermediariaDate, amt:(v.valorRecebimentoParcelaIntermediaria>0? v.valorRecebimentoParcelaIntermediaria : vendaValBase*0.20), real:dates.real.vendaParcIntermediaria});
+    lines.push({label:'Recebimento parcela final venda (70%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.70) - vendaValBase*custoVendaPct, real:dates.real.vendaParcFinal});
   } else {
-    lines.push({label:'Recebimento parcela final venda (90%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.90) - vendaValBase*custoVendaPct});
+    lines.push({label:'Recebimento parcela final venda (90%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.90) - vendaValBase*custoVendaPct, real:dates.real.vendaParcFinal});
   }
   lines.sort((a,b)=>a.date-b.date);
   return { lines, anchor: dates.anchor };
@@ -1077,84 +1137,119 @@ function openInvestimentoDetail(inv){
   updateInvPresente();
 }
 
-function abrirCronogramaEmJanela(){
-  const { lines } = buildCashflowLines(virtualDefaultInv(currentInv));
-  const rows = lines.map(l=>{
-    const cor = l.amt<0 ? '#B23A2E' : '#1E7A3D';
-    return `<tr><td>${l.date.toLocaleDateString('pt-BR')}</td><td>${l.label}</td><td style="color:${cor};text-align:right;">${fmtR(l.amt)}</td></tr>`;
-  }).join('');
-  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-    <title>Cronograma previsto — ${currentInv.nome||''}</title>
-    <style>
-      body{font-family:Arial,sans-serif;margin:24px;color:#16232E;background:#F4F5F1;}
-      h1{font-size:18px;margin:0 0 4px;}
-      p.sub{font-size:12.5px;color:#54626D;margin:0 0 20px;}
-      table{border-collapse:collapse;width:100%;background:#fff;border-radius:8px;overflow:hidden;}
-      th,td{padding:9px 12px;font-size:13px;text-align:left;border-bottom:1px solid #E7E9E2;}
-      th{background:#16232E;color:#fff;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;}
-      td:last-child, th:last-child{text-align:right;}
-    </style></head><body>
-    <h1>Cronograma previsto (default) — ${currentInv.nome||'(sem nome)'}</h1>
-    <p class="sub">${currentInv.endereco||''} · TIR default: ${fmtPct(currentInv.tirDefault)} · Referência a partir de ${toDate(currentInv.dataFechamentoDefault).toLocaleDateString('pt-BR')}. Esta janela é só para consulta — não altera os dados lançados.</p>
-    <table><thead><tr><th>Data prevista</th><th>Lançamento</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table>
-    </body></html>`;
-  const win = window.open('', '_blank', 'width=640,height=720');
-  if(win){ win.document.write(html); win.document.close(); }
-  else { alert('Não foi possível abrir a nova janela — verifique se o navegador bloqueou pop-ups.'); }
+function realTIR(inv){
+  const { lines } = buildCashflowLines(inv);
+  const realLines = lines.filter(l=>l.real);
+  const hasNeg = realLines.some(l=>l.amt<0), hasPos = realLines.some(l=>l.amt>0);
+  if(realLines.length<2 || !hasNeg || !hasPos) return null;
+  const anchor = realLines[0].date;
+  const xcfs = realLines.map(l=>({days: daysBetween(anchor, l.date), amt: l.amt}));
+  return xirr(xcfs);
 }
 
-document.getElementById('btn-toggle-cronograma').addEventListener('click', abrirCronogramaEmJanela);
+function abrirLedgerModal(mode){
+  const isDefault = mode==='default';
+  const lines = isDefault
+    ? buildCashflowLines(virtualDefaultInv(currentInv)).lines
+    : buildCashflowLines(currentInv).lines.filter(l=>l.real);
+  document.getElementById('ledger-modal-title').textContent = isDefault ? 'Movimento de Caixa (default)' : 'Movimento de Caixa (real)';
+  const tirLabel = isDefault ? fmtPct(currentInv.tirDefault) : fmtPct(realTIR(currentInv));
+  document.getElementById('ledger-modal-sub').textContent = isDefault
+    ? `TIR default: ${tirLabel} · Projeção 100% a partir da data de encontro do apto — não altera os dados lançados.`
+    : `TIR real (só com o que já foi lançado): ${tirLabel}. ${lines.length===0?'Nenhum lançamento real registrado ainda.':''}`;
+  document.getElementById('ledger-modal-body').innerHTML = lines.map(l=>{
+    const cor = l.amt<0 ? 'var(--bad)' : 'var(--good)';
+    return `<tr><td style="text-align:left;padding:7px 10px;">${l.date.toLocaleDateString('pt-BR')}</td><td style="text-align:left;padding:7px 10px;">${l.label}</td><td style="color:${cor};padding:7px 10px;">${fmtR(l.amt)}</td></tr>`;
+  }).join('');
+  document.getElementById('ledger-modal').hidden = false;
+}
+function fecharLedgerModal(){ document.getElementById('ledger-modal').hidden = true; }
+document.getElementById('btn-mov-default').addEventListener('click', ()=>abrirLedgerModal('default'));
+document.getElementById('btn-mov-real').addEventListener('click', ()=>abrirLedgerModal('real'));
+document.getElementById('btn-close-ledger').addEventListener('click', fecharLedgerModal);
+document.getElementById('btn-close-ledger-2').addEventListener('click', fecharLedgerModal);
+document.getElementById('ledger-modal').addEventListener('click', (ev)=>{ if(ev.target.id==='ledger-modal') fecharLedgerModal(); });
+document.addEventListener('keydown', (ev)=>{ if(ev.key==='Escape') fecharLedgerModal(); });
+
+/* ============================================================
+   GRÁFICO — evolução da TIR real ao longo do tempo
+   ============================================================ */
+let tirChartInstance = null;
+function recordTirHistory(inv, tir){
+  if(!isFinite(tir)) return;
+  if(!inv.tirHistory || !inv.tirHistory.length) inv.tirHistory = [{ts: inv.dataFechamentoDefault, tir: inv.tirDefault}];
+  const today = new Date().toISOString().slice(0,10);
+  const last = inv.tirHistory[inv.tirHistory.length-1];
+  if(last && last.ts===today){ last.tir = tir; }
+  else { inv.tirHistory.push({ts:today, tir}); }
+}
+function renderTirChart(){
+  const hist = currentInv.tirHistory && currentInv.tirHistory.length ? currentInv.tirHistory : [{ts: currentInv.dataFechamentoDefault, tir: currentInv.tirDefault}];
+  const labels = hist.map(h=>new Date(h.ts+'T00:00:00').toLocaleDateString('pt-BR'));
+  const data = hist.map(h=>+(h.tir*100).toFixed(1));
+  const ctx = document.getElementById('tir-chart').getContext('2d');
+  if(tirChartInstance){ tirChartInstance.destroy(); }
+  tirChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label:'TIR (%)', data, borderColor:'#3C3489', backgroundColor:'rgba(60,52,137,0.10)', tension:.25, fill:true, pointRadius:3, pointBackgroundColor:'#3C3489' }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c=>c.parsed.y+'%' } } },
+      scales:{ y:{ ticks:{ callback: v=>v+'%' } } }
+    }
+  });
+}
 
 function buildInvForm(){
   const wrap = document.getElementById('inv-phases');
   const fin1 = currentInv.financInicial, fin2 = currentInv.financFinal;
 
-  let compraFields = row('Data de fechamento do negócio','compra.dataFechamento') +
-    row('Data de assinatura do CCV','compra.dataAssinaturaCCV') +
+  let compraFields = row('Dt encontro apto','compra.dataFechamento') +
+    row('Dt assinatura CCV','compra.dataAssinaturaCCV') +
+    row('Dt liberação sinal','compra.dataLiberacaoSinal','compra.valorSinal', 'R$') +
+    row('Valor ITBI/cartório', null, 'compra.valorITBI', 'R$');
+  if(fin1){
+    compraFields += row('Dt parcela intermediária','compra.dataLiberacaoParcelaIntermediaria','compra.valorParcelaIntermediaria', 'R$') +
+      row('Dt assinatura empréstimo','compra.dataAssinaturaEmprestimo') +
+      row('Dt parcela final','compra.dataLiberacaoParcelaFinal','compra.valorParcelaFinal', 'R$');
+  } else {
+    compraFields += row('Dt parcela final','compra.dataLiberacaoParcelaFinal','compra.valorParcelaFinal', 'R$');
+  }
+  compraFields += row('Dt recebimento chaves','compra.dataRecebimentoChaves') +
+    row('Dt conclusão projeto','compra.dataConclusaoProjeto') +
+    row('Dt conclusão orçamento','compra.dataConclusaoOrcamentoExecutivo','compra.valorOrcamentoExecutivo', 'R$') +
+    row('Dt liberação condomínio','compra.dataLiberacaoReformaCondominio') +
     `<div class="despesas-block">
-       <div class="desp-hdr">Outras despesas da compra (discriminadas)</div>
+       <div class="desp-hdr">Outras despesas (discriminadas)</div>
        <div id="despesas-rows" class="entry-table"></div>
        <button class="btn subtle" id="btn-add-despesa" type="button" style="margin-top:6px;">+ Adicionar despesa</button>
-     </div>` +
-    row('Data de liberação do sinal','compra.dataLiberacaoSinal','compra.valorSinal', 'R$') +
-    row('Valor do ITBI e cartório', null, 'compra.valorITBI', 'R$');
-  if(fin1){
-    compraFields += row('Data de liberação da parcela intermediária','compra.dataLiberacaoParcelaIntermediaria','compra.valorParcelaIntermediaria', 'R$') +
-      row('Data de assinatura do empréstimo de compra','compra.dataAssinaturaEmprestimo') +
-      row('Data de liberação da parcela final','compra.dataLiberacaoParcelaFinal','compra.valorParcelaFinal', 'R$');
-  } else {
-    compraFields += row('Data de liberação da parcela final','compra.dataLiberacaoParcelaFinal','compra.valorParcelaFinal', 'R$');
-  }
-  compraFields += row('Data de recebimento das chaves','compra.dataRecebimentoChaves') +
-    row('Data da conclusão do projeto','compra.dataConclusaoProjeto') +
-    row('Data da conclusão do orçamento executivo','compra.dataConclusaoOrcamentoExecutivo','compra.valorOrcamentoExecutivo', 'R$') +
-    row('Data de liberação da reforma pelo condomínio','compra.dataLiberacaoReformaCondominio');
+     </div>`;
 
-  const obraFields = row('Data do início da reforma','obra.dataInicioReforma') +
-    row('Data de previsão de término da reforma','obra.dataPrevisaoTermino') +
-    row('Data da conclusão da reforma','obra.dataConclusao');
+  const obraFields = row('Dt início reforma','obra.dataInicioReforma') +
+    row('Dt previsão término','obra.dataPrevisaoTermino') +
+    row('Dt conclusão reforma','obra.dataConclusao');
 
-  let vendaFields = row('Data de liberação do apto para venda (corretores)','venda.dataLiberacaoCorretores') +
-    row('Data de proposta aceita','venda.dataPropostaAceita','venda.valorVenda', 'R$') +
-    row('Data de assinatura do CCV','venda.dataAssinaturaCCV') +
-    row('Data de recebimento do sinal','venda.dataRecebimentoSinal','venda.valorRecebimentoSinal', 'R$');
+  let vendaFields = row('Dt liberação corretores','venda.dataLiberacaoCorretores') +
+    row('Dt proposta aceita','venda.dataPropostaAceita','venda.valorVenda', 'R$') +
+    row('Dt assinatura CCV','venda.dataAssinaturaCCV') +
+    row('Dt recebimento sinal','venda.dataRecebimentoSinal','venda.valorRecebimentoSinal', 'R$');
   if(fin2){
-    vendaFields += row('Data de recebimento da parcela intermediária','venda.dataRecebimentoParcelaIntermediaria','venda.valorRecebimentoParcelaIntermediaria', 'R$') +
-      row('Data de assinatura do financiamento bancário','venda.dataAssinaturaFinanciamento') +
-      row('Data de recebimento da parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
+    vendaFields += row('Dt parcela intermediária','venda.dataRecebimentoParcelaIntermediaria','venda.valorRecebimentoParcelaIntermediaria', 'R$') +
+      row('Dt assinatura financiamento','venda.dataAssinaturaFinanciamento') +
+      row('Dt parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
   } else {
-    vendaFields += row('Data de recebimento da parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
+    vendaFields += row('Dt parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
   }
 
   const compraCollapsed = currentInv.ui.compraCollapsed;
   wrap.innerHTML = `
     <div class="phase-block${compraCollapsed?' collapsed':''}" id="block-compra">
-      <div class="phase-head"><h3 style="color:#0E5C52">Etapa da compra</h3>
+      <div class="phase-head"><h3 class="phase-title" style="color:#3C3489">COMPRA</h3>
         <button class="phase-collapse-btn" id="btn-collapse-compra">${compraCollapsed?'Expandir':'Concluída — minimizar'}</button></div>
       <div class="phase-body"><div class="entry-table">${compraFields}</div></div>
     </div>
     <div class="phase-block">
-      <div class="phase-head"><h3 style="color:#9A6B0A">Etapa da obra</h3></div>
+      <div class="phase-head"><h3 class="phase-title" style="color:#D85A30">OBRA</h3></div>
       <div class="phase-body">
         <div class="entry-table">${obraFields}</div>
         <label class="field" style="margin:14px 0 6px;">Liberações da reforma (datas e valores já pagos)</label>
@@ -1163,7 +1258,7 @@ function buildInvForm(){
       </div>
     </div>
     <div class="phase-block">
-      <div class="phase-head"><h3 style="color:#1E7A3D">Etapa da venda</h3></div>
+      <div class="phase-head"><h3 class="phase-title" style="color:#0F6E56">VENDA</h3></div>
       <div class="phase-body"><div class="entry-table">${vendaFields}</div></div>
     </div>
   `;
@@ -1299,7 +1394,10 @@ function renderDespesasRows(){
 }
 
 function updateInvPresente(){
-  document.getElementById('inv-tir-presente').textContent = fmtPct(presenteTIR(currentInv));
+  const tir = presenteTIR(currentInv);
+  document.getElementById('inv-tir-presente').textContent = fmtPct(tir);
+  recordTirHistory(currentInv, tir);
+  renderTirChart();
 }
 
 /* ============================================================
