@@ -122,6 +122,9 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
 .entry-table input.e-desc{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table .e-empty{visibility:hidden;}
+.entry-table .e-hint-row{grid-column:1/-1;grid-row:auto;font-size:12px;color:#fff;background:var(--accent);border-radius:6px;max-height:0;overflow:hidden;opacity:0;padding:0 10px;transition:max-height .15s ease,opacity .15s ease,margin .15s ease;}
+.entry-table .e-hint-row.show{max-height:34px;opacity:1;padding:7px 10px;margin:-1px 0 4px;}
+.entry-table .e-hint-row b{font-weight:700;}
 .entry-table .e-hint{font-size:11px;color:var(--accent);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !important;border-color:var(--warn) !important;font-weight:600;}
 .entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
@@ -144,8 +147,6 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 .inv-nome-destaque{font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--ink);margin:0 0 4px;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:1000;padding:0;}
 .modal-overlay[hidden]{display:none !important;}
-#field-hint-tooltip{position:fixed;top:14px;right:14px;left:auto;max-width:min(300px,calc(100vw - 28px));background:var(--accent);color:#fff;font-size:13px;line-height:1.4;padding:10px 14px;border-radius:10px;z-index:2000;pointer-events:none;white-space:normal;box-shadow:0 4px 16px rgba(0,0,0,.25);}
-#field-hint-tooltip[hidden]{display:none !important;}
 #login-screen[hidden]{display:none !important;}
 .modal-panel{background:var(--panel);border-radius:18px 18px 0 0;padding:24px 16px 34px;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
@@ -396,8 +397,6 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 
   </section>
 </main>
-
-<div id="field-hint-tooltip" hidden></div>
 
 <div id="ledger-modal" class="modal-overlay" hidden>
   <div class="modal-panel">
@@ -1145,20 +1144,23 @@ function virtualDefaultInv(inv){
    alinhados sempre nas mesmas colunas (label | data | valor)
    ============================================================ */
 function row(label, datePath, valuePath, placeholder){
-  const dateCell = datePath ? `<input type="date" data-path="${datePath}" data-hinttype="date">` : `<div class="e-empty"></div>`;
-  const valCell = valuePath ? `<input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" data-hinttype="money" placeholder="${placeholder||''}">` : `<div class="e-empty"></div>`;
-  return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div>`;
+  const hintId = 'hint-' + (datePath||valuePath).replace(/\./g,'-');
+  const dateCell = datePath ? `<input type="date" data-path="${datePath}" data-hinttype="date" data-hintrow="${hintId}">` : `<div class="e-empty"></div>`;
+  const valCell = valuePath ? `<input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" data-hinttype="money" data-hintrow="${hintId}" placeholder="${placeholder||''}">` : `<div class="e-empty"></div>`;
+  return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div><div class="e-hint-row" id="${hintId}"></div>`;
 }
 function getPath(obj, path){ return path.split('.').reduce((o,k)=>(o? o[k] : undefined), obj); }
 function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i=0;i<ks.length-1;i++){ if(!o[ks[i]]) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
 
 function showFieldHint(inp, text){
-  const tip = document.getElementById('field-hint-tooltip');
-  tip.innerHTML = '<div style="font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">Previsto (default)</div>' + text;
-  tip.hidden = false;
+  const row = document.getElementById(inp.dataset.hintrow);
+  if(!row) return;
+  row.innerHTML = '<b>Previsto (default):</b> ' + text;
+  row.classList.add('show');
 }
-function hideFieldHint(){
-  document.getElementById('field-hint-tooltip').hidden = true;
+function hideFieldHint(inp){
+  const row = document.getElementById(inp.dataset.hintrow);
+  if(row) row.classList.remove('show');
 }
 
 /** valores/datas previstos pelo default para cada campo — exibidos como dica ao focar */
@@ -1449,7 +1451,7 @@ function buildInvForm(){
         showFieldHint(inp, inp.dataset.hinttype==='date' ? h.value.toLocaleDateString('pt-BR') : fmtR(h.value));
       }
     });
-    inp.addEventListener('blur', hideFieldHint);
+    inp.addEventListener('blur', ()=>hideFieldHint(inp));
   });
 
   document.getElementById('btn-add-liber').addEventListener('click', async ()=>{
