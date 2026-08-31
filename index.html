@@ -122,7 +122,7 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .phase-block{margin-bottom:26px;}
 .phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .phase-head h3.phase-title{font-size:19px;font-weight:700;letter-spacing:.04em;font-family:'Inter',sans-serif;}
-.entry-table{display:grid;grid-template-columns:minmax(90px,1.3fr) 0.85fr 1.05fr 20px;row-gap:3px;column-gap:6px;align-items:center;max-width:100%;}
+.entry-table{display:grid;grid-template-columns:minmax(80px,1fr) minmax(0,0.55fr) minmax(0,1.35fr) 20px;row-gap:3px;column-gap:6px;align-items:center;max-width:100%;}
 .entry-table .e-label{font-size:12px;color:var(--ink-soft);padding:5px 0;}
 .entry-table input[type=date]{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
@@ -141,7 +141,7 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 .entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
 .despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-s);border:.5px dashed var(--line);}
 .despesas-block .desp-hdr{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
-.despesas-block .entry-table{grid-template-columns:minmax(80px,1.4fr) 1fr 1fr 22px;}
+.despesas-block .entry-table{grid-template-columns:minmax(70px,1fr) minmax(0,0.6fr) minmax(0,1.3fr) 20px;}
 .phase-collapse-btn{border:.5px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:20px;font-size:11.5px;color:var(--ink-soft);}
 .phase-block.collapsed .phase-body{display:none;}
 @media (max-width:720px){ .entry-table .e-label{font-size:11px;} }
@@ -422,6 +422,11 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
         </div>
 
         <div id="inv-phases"></div>
+
+        <div class="phase-block" style="background:var(--bg);border-radius:var(--radius);padding:16px 18px;margin-top:26px;">
+          <p style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;">Resumo final do investimento</p>
+          <div id="resumo-final-body" class="row-3col" style="grid-template-columns:1fr 1fr 1fr;"></div>
+        </div>
       </div>
     </div>
 
@@ -476,7 +481,7 @@ const PRAZOS = {
   venda_sem:  { fim_reforma_ini_venda:[0,10,15], ini_venda_aceite:[20,60,90], ccv_sinal:[10,15,20], parc2_chaves:[10,20,30] },
   venda_com:  { fim_reforma_ini_venda:[0,10,15], ini_venda_aceite:[20,60,90], ccv_sinal:[10,15,20], parc2_financ:[30,60,75], financ_chaves:[10,15,20] }
 };
-const CONST = { itbiPct:0.04, custoVendaPct:0.135 };
+const CONST = { itbiPct:0.04 };
 const SCEN = ['plus','default','minus'];
 
 /* ============================================================
@@ -569,23 +574,28 @@ function calcTIR(days, vals, financInicial, financFinal){
   const t7 = t6+days.ini_venda_aceite;
   const t8 = t7+days.ccv_sinal;
   let chavesVenda, inflows=[];
-  inflows.push([t8, venda*0.10, false]);
+  inflows.push([t8, venda*0.10]);
   if(!financFinal){
     const t9=t8+days.parc2_chaves_v; chavesVenda=t9;
-    inflows.push([t9, venda*0.90, true]);
+    inflows.push([t9, venda*0.90]);
   } else {
     const t9a=t8+days.parc2_financ, t9b=t9a+days.financ_chaves_v; chavesVenda=t9b;
-    inflows.push([t9a, venda*0.20, false]);
-    inflows.push([t9b, venda*0.70, true]);
+    inflows.push([t9a, venda*0.20]);
+    inflows.push([t9b, venda*0.70]);
   }
-  let d=chavesCompra;
-  while(d<chavesVenda){ d+=30; if(d>chavesVenda)d=chavesVenda; outflows.push([d, vals.condominio]); }
+  let d=chavesCompra, condTotal=0;
+  while(d<chavesVenda){ d+=30; if(d>chavesVenda)d=chavesVenda; outflows.push([d, vals.condominio]); condTotal+=vals.condominio; }
+
+  const ded = computeVendaDeducoes(compra, itbi, reforma, condTotal, venda);
 
   const cfs=[];
   outflows.forEach(([day,amt])=>cfs.push({days:day, amt:-amt}));
-  inflows.forEach(([day,amt,isLast])=>{
-    let v=amt; if(isLast) v -= venda*CONST.custoVendaPct;
-    cfs.push({days:day, amt:v});
+  inflows.forEach(([day,amt])=>{
+    const pct = amt/venda;
+    cfs.push({days:day, amt:amt});
+    cfs.push({days:day, amt:-ded.comissao*pct});
+    cfs.push({days:day, amt:-ded.imposto*pct});
+    cfs.push({days:day, amt:-ded.bonus*pct});
   });
   const totalDays = Math.max(...inflows.map(x=>x[0]));
   return { tir: xirr(cfs), totalDays, chavesCompra, chavesVenda, fimObra:t5 };
@@ -1125,16 +1135,45 @@ function reformaOutflows(inv, dates){
   return outflows;
 }
 
+/** Comissão, imposto e bônus — resolve a circularidade (bônus depende do imposto e vice-versa)
+ *  algebricamente: Imposto = 15%*(B-Bônus); Bônus = 20%*(A-Imposto), onde
+ *  B = Venda-(Compra+ITBI+Reforma) e A = B-Condomínios. */
+function computeVendaDeducoes(compraVal, itbiVal, reformaVal, condTotal, vendaVal){
+  const B = vendaVal - (compraVal + itbiVal + reformaVal);
+  const A = B - condTotal;
+  const comissao = vendaVal * 0.06;
+  const bonus = (0.20*A - 0.03*B) / 0.97;
+  const imposto = 0.15*(B - bonus);
+  return { comissao, imposto, bonus };
+}
+
+function vendaDeducaoLinhas(prefix, pctShare, ded, v, defaultDate){
+  const itens = [
+    {key:'Comissao', label:'Pgto comissão de venda', total:ded.comissao},
+    {key:'Imposto', label:'Pgto imposto', total:ded.imposto},
+    {key:'Bonus', label:'Pgto bônus', total:ded.bonus}
+  ];
+  return itens.map(it=>{
+    const dPath = 'dataPgto'+it.key+prefix, vPath = 'valorPgto'+it.key+prefix;
+    const realDate = toDate(v[dPath]);
+    const realVal = v[vPath];
+    const date = realDate || defaultDate;
+    const amt = realVal>0 ? realVal : it.total*pctShare;
+    return { label: it.label, date, amt: -amt, real: !!realDate, dPath, vPath };
+  });
+}
+
 function buildCashflowLines(inv){
   ensureInvStruct(inv);
   const dates = projectDates(inv);
   const c = inv.compra, v = inv.venda;
   const compraVal = inv.valorCompra;
   const vendaValBase = (v.valorVenda>0 ? v.valorVenda : inv.valorVenda);
-  const custoVendaPct = 0.135;
+  const itbiVal = (c.valorITBI>0 ? c.valorITBI : compraVal*0.04);
+  const reformaValUsed = (c.valorOrcamentoExecutivo>0 ? c.valorOrcamentoExecutivo : inv.valorReformaTotal);
   const lines = [];
 
-  const sinalVal = (c.valorSinal>0?c.valorSinal:compraVal*0.10) + (c.valorITBI>0?c.valorITBI:compraVal*0.04);
+  const sinalVal = (c.valorSinal>0?c.valorSinal:compraVal*0.10) + itbiVal;
   lines.push({label:'Sinal (10%) + ITBI/cartório', date:dates.sinalDate, amt:-sinalVal, real:dates.real.sinal});
   if(inv.financInicial){
     lines.push({label:'Parcela intermediária (20%)', date:dates.parcIntermediariaDate, amt:-(c.valorParcelaIntermediaria>0?c.valorParcelaIntermediaria:compraVal*0.20), real:dates.real.parcIntermediaria});
@@ -1144,21 +1183,30 @@ function buildCashflowLines(inv){
   }
   reformaOutflows(inv, dates).forEach((o,i)=>lines.push({label:`Parcela de reforma`, date:o.date, amt:-o.amt, real:o.real}));
   (c.outrasDespesas||[]).filter(d=>d.data && d.valor>0).forEach(d=>lines.push({label:d.descricao||'Outra despesa', date:toDate(d.data), amt:-d.valor, real:true}));
+
+  let condTotal = 0;
   {
     let d = dates.chavesDate;
     const end = dates.vendaParcFinalDate;
-    while(d < end){ d = addDays(d,30); if(d>end) d=end; lines.push({label:'Condomínio', date:new Date(d), amt:-inv.condominio, real:false}); }
+    while(d < end){ d = addDays(d,30); if(d>end) d=end; lines.push({label:'Condomínio', date:new Date(d), amt:-inv.condominio, real:false}); condTotal += inv.condominio; }
   }
+
+  const ded = computeVendaDeducoes(compraVal, itbiVal, reformaValUsed, condTotal, vendaValBase);
+
   const sinalV = v.valorRecebimentoSinal>0? v.valorRecebimentoSinal : vendaValBase*0.10;
   lines.push({label:'Recebimento sinal venda (10%)', date:dates.vendaSinalDate, amt:sinalV, real:dates.real.vendaSinal});
+  vendaDeducaoLinhas('Sinal', 0.10, ded, v, dates.vendaSinalDate).forEach(l=>lines.push(l));
   if(inv.financFinal){
     lines.push({label:'Recebimento parcela intermediária venda (20%)', date:dates.vendaParcIntermediariaDate, amt:(v.valorRecebimentoParcelaIntermediaria>0? v.valorRecebimentoParcelaIntermediaria : vendaValBase*0.20), real:dates.real.vendaParcIntermediaria});
-    lines.push({label:'Recebimento parcela final venda (70%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.70) - vendaValBase*custoVendaPct, real:dates.real.vendaParcFinal});
+    vendaDeducaoLinhas('Interm', 0.20, ded, v, dates.vendaParcIntermediariaDate).forEach(l=>lines.push(l));
+    lines.push({label:'Recebimento parcela final venda (70%)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.70), real:dates.real.vendaParcFinal});
+    vendaDeducaoLinhas('Final', 0.70, ded, v, dates.vendaParcFinalDate).forEach(l=>lines.push(l));
   } else {
-    lines.push({label:'Recebimento parcela final venda (90%, líq. custos)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.90) - vendaValBase*custoVendaPct, real:dates.real.vendaParcFinal});
+    lines.push({label:'Recebimento parcela final venda (90%)', date:dates.vendaParcFinalDate, amt:(v.valorRecebimentoParcelaFinal>0? v.valorRecebimentoParcelaFinal : vendaValBase*0.90), real:dates.real.vendaParcFinal});
+    vendaDeducaoLinhas('Final', 0.90, ded, v, dates.vendaParcFinalDate).forEach(l=>lines.push(l));
   }
   lines.sort((a,b)=>a.date-b.date);
-  return { lines, anchor: dates.anchor };
+  return { lines, anchor: dates.anchor, ded, condTotal, itbiVal, reformaValUsed, compraVal, vendaValBase, dates };
 }
 
 function presenteTIR(inv){
@@ -1194,10 +1242,17 @@ function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i
 function computeDefaultHints(){
   const inv = currentInv;
   const dInv = virtualDefaultInv(inv);
-  const dates = projectDates(dInv);
+  const { dates, ded } = buildCashflowLines(dInv);
   const compraVal = inv.valorCompra, vendaVal = inv.valorVenda, reformaVal = inv.valorReformaTotal;
-  const custoVendaPct = 0.135;
   const H = {};
+  function addDeducaoHints(suffix, pct, date){
+    H['venda.dataPgtoComissao'+suffix] = {type:'date', value: date};
+    H['venda.valorPgtoComissao'+suffix] = {type:'money', value: ded.comissao*pct};
+    H['venda.dataPgtoImposto'+suffix] = {type:'date', value: date};
+    H['venda.valorPgtoImposto'+suffix] = {type:'money', value: ded.imposto*pct};
+    H['venda.dataPgtoBonus'+suffix] = {type:'date', value: date};
+    H['venda.valorPgtoBonus'+suffix] = {type:'money', value: ded.bonus*pct};
+  }
   H['compra.dataAceiteCompra'] = {type:'date', value: toDate(dInv.compra.dataAceiteCompra)};
   H['compra.dataAssinaturaCCV'] = {type:'date', value: dates.sinalDate};
   H['compra.dataLiberacaoSinal'] = {type:'date', value: dates.sinalDate};
@@ -1227,15 +1282,19 @@ function computeDefaultHints(){
   H['venda.dataAssinaturaCCV'] = {type:'date', value: dates.vendaSinalDate};
   H['venda.dataRecebimentoSinal'] = {type:'date', value: dates.vendaSinalDate};
   H['venda.valorRecebimentoSinal'] = {type:'money', value: vendaVal*0.10};
+  addDeducaoHints('Sinal', 0.10, dates.vendaSinalDate);
   if(inv.financFinal){
     H['venda.dataRecebimentoParcelaIntermediaria'] = {type:'date', value: dates.vendaParcIntermediariaDate};
     H['venda.valorRecebimentoParcelaIntermediaria'] = {type:'money', value: vendaVal*0.20};
+    addDeducaoHints('Interm', 0.20, dates.vendaParcIntermediariaDate);
     H['venda.dataAssinaturaFinanciamento'] = {type:'date', value: dates.vendaParcIntermediariaDate};
     H['venda.dataRecebimentoParcelaFinal'] = {type:'date', value: dates.vendaParcFinalDate};
-    H['venda.valorRecebimentoParcelaFinal'] = {type:'money', value: vendaVal*0.70 - vendaVal*custoVendaPct};
+    H['venda.valorRecebimentoParcelaFinal'] = {type:'money', value: vendaVal*0.70};
+    addDeducaoHints('Final', 0.70, dates.vendaParcFinalDate);
   } else {
     H['venda.dataRecebimentoParcelaFinal'] = {type:'date', value: dates.vendaParcFinalDate};
-    H['venda.valorRecebimentoParcelaFinal'] = {type:'money', value: vendaVal*0.90 - vendaVal*custoVendaPct};
+    H['venda.valorRecebimentoParcelaFinal'] = {type:'money', value: vendaVal*0.90};
+    addDeducaoHints('Final', 0.90, dates.vendaParcFinalDate);
   }
   return H;
 }
@@ -1454,16 +1513,25 @@ function buildInvForm(){
     row('Dt previsão término','obra.dataPrevisaoTermino') +
     row('Dt conclusão reforma','obra.dataConclusao');
 
+  function deducaoRows(suffix){
+    return row('Dt pgto comissão de venda','venda.dataPgtoComissao'+suffix,'venda.valorPgtoComissao'+suffix,'R$') +
+      row('Dt pgto Imposto','venda.dataPgtoImposto'+suffix,'venda.valorPgtoImposto'+suffix,'R$') +
+      row('Dt pgto Bônus','venda.dataPgtoBonus'+suffix,'venda.valorPgtoBonus'+suffix,'R$');
+  }
   let vendaFields = row('Dt liberação corretores','venda.dataLiberacaoCorretores') +
     row('Dt proposta aceita','venda.dataPropostaAceita','venda.valorVenda', 'R$') +
     row('Dt assinatura CCV','venda.dataAssinaturaCCV') +
-    row('Dt recebimento sinal','venda.dataRecebimentoSinal','venda.valorRecebimentoSinal', 'R$');
+    row('Dt recebimento sinal','venda.dataRecebimentoSinal','venda.valorRecebimentoSinal', 'R$') +
+    deducaoRows('Sinal');
   if(fin2){
     vendaFields += row('Dt parcela intermediária','venda.dataRecebimentoParcelaIntermediaria','venda.valorRecebimentoParcelaIntermediaria', 'R$') +
+      deducaoRows('Interm') +
       row('Dt assinatura financiamento','venda.dataAssinaturaFinanciamento') +
-      row('Dt parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
+      row('Dt parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$') +
+      deducaoRows('Final');
   } else {
-    vendaFields += row('Dt parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$');
+    vendaFields += row('Dt parcela final','venda.dataRecebimentoParcelaFinal','venda.valorRecebimentoParcelaFinal', 'R$') +
+      deducaoRows('Final');
   }
 
   const compraCollapsed = currentInv.ui.compraCollapsed;
@@ -1639,10 +1707,39 @@ function renderDespesasRows(){
 
 function updateInvPresente(){
   const tir = presenteTIR(currentInv);
-  const hasReal = buildCashflowLines(currentInv).lines.some(l=>l.real);
+  const { lines, ded, dates } = buildCashflowLines(currentInv);
+  const hasReal = lines.some(l=>l.real);
   document.getElementById('inv-tir-presente').textContent = hasReal ? fmtPct(tir) : '—';
   if(hasReal) recordTirHistory(currentInv, tir);
   renderTirChart();
+  renderResumoFinal(lines, ded, dates, tir, hasReal);
+}
+
+function renderResumoFinal(lines, ded, dates, tir, hasReal){
+  const inv = currentInv;
+  const totalInvestido = -lines.filter(l=>l.amt<0 && !l.label.startsWith('Pgto ')).reduce((s,l)=>s+l.amt,0);
+  const totalRecebidoLiquido = lines.filter(l=>l.label.startsWith('Recebimento')).reduce((s,l)=>s+l.amt,0)
+    + lines.filter(l=>l.label.startsWith('Pgto ')).reduce((s,l)=>s+l.amt,0);
+  const lucro = totalRecebidoLiquido - totalInvestido;
+  const periodoMeses = (daysBetween(dates.anchor, dates.vendaParcFinalDate)/30).toFixed(1);
+  const vendaValReal = (inv.venda.valorVenda>0 ? inv.venda.valorVenda : inv.valorVenda);
+  const reformaValReal = (inv.compra.valorOrcamentoExecutivo>0 ? inv.compra.valorOrcamentoExecutivo : inv.valorReformaTotal);
+  const dtVenda = toDate(inv.venda.dataAssinaturaCCV) || dates.vendaSinalDate;
+
+  const campos = [
+    ['Dt da venda', dtVenda.toLocaleDateString('pt-BR')],
+    ['Dt do recebimento final', dates.vendaParcFinalDate.toLocaleDateString('pt-BR')],
+    ['Período total do investimento', periodoMeses+' meses'],
+    ['Valor real da venda', fmtR(vendaValReal)],
+    ['Valor real da reforma', fmtR(reformaValReal)],
+    ['Bônus', fmtR(ded.bonus)],
+    ['TIR real', hasReal?fmtPct(tir):'—'],
+    ['Valor total investido', fmtR(totalInvestido)],
+    ['Lucro final em R$', fmtR(lucro)]
+  ];
+  document.getElementById('resumo-final-body').innerHTML = campos.map(([label,val])=>
+    `<div><label class="field">${label}</label><input type="text" readonly value="${val}"></div>`
+  ).join('');
 }
 
 /* ============================================================
