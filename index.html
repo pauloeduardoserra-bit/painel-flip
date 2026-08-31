@@ -122,7 +122,7 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .phase-block{margin-bottom:26px;}
 .phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .phase-head h3.phase-title{font-size:19px;font-weight:700;letter-spacing:.04em;font-family:'Inter',sans-serif;}
-.entry-table{display:grid;grid-template-columns:minmax(90px,1.5fr) 1fr 1fr 22px;row-gap:3px;column-gap:8px;align-items:center;max-width:100%;}
+.entry-table{display:grid;grid-template-columns:minmax(90px,1.3fr) 0.85fr 1.05fr 20px;row-gap:3px;column-gap:6px;align-items:center;max-width:100%;}
 .entry-table .e-label{font-size:12px;color:var(--ink-soft);padding:5px 0;}
 .entry-table input[type=date]{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
@@ -130,7 +130,7 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .entry-table .e-empty{visibility:hidden;}
 .field-wrap{position:relative;}
 .date-wrap{display:flex;align-items:center;gap:4px;}
-.date-wrap input[type=date]{flex:1;min-width:0;}
+.date-wrap input[type=date],.date-wrap input.money-mask{flex:1;min-width:0;}
 .hint-btn{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;font-style:italic;font-family:Georgia,serif;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
 .hint-btn.active{background:var(--accent);color:#fff;}
 .e-hint-pop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--accent);color:#fff;font-size:11px;line-height:1.3;border-radius:6px;padding:0 8px;max-height:0;opacity:0;overflow:hidden;transition:max-height .15s ease,opacity .15s ease,padding .15s ease;z-index:50;white-space:normal;box-shadow:0 3px 10px rgba(0,0,0,.18);}
@@ -1184,22 +1184,11 @@ function virtualDefaultInv(inv){
    ============================================================ */
 function row(label, datePath, valuePath, placeholder){
   const dateCell = datePath ? `<div class="field-wrap date-wrap"><input type="date" data-path="${datePath}"><button type="button" class="hint-btn" data-hinttype="date" data-hintfor="${datePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
-  const valCell = valuePath ? `<div class="field-wrap"><input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" data-hinttype="money" placeholder="${placeholder||''}"><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
+  const valCell = valuePath ? `<div class="field-wrap date-wrap"><input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" placeholder="${placeholder||''}"><button type="button" class="hint-btn" data-hinttype="money" data-hintfor="${valuePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
   return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div>`;
 }
 function getPath(obj, path){ return path.split('.').reduce((o,k)=>(o? o[k] : undefined), obj); }
 function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i=0;i<ks.length-1;i++){ if(!o[ks[i]]) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
-
-function showFieldHint(inp, text){
-  const pop = inp.nextElementSibling;
-  if(!pop || !pop.classList.contains('e-hint-pop')) return;
-  pop.innerHTML = '<b>Previsto:</b> ' + text;
-  pop.classList.add('show');
-}
-function hideFieldHint(inp){
-  const pop = inp.nextElementSibling;
-  if(pop && pop.classList.contains('e-hint-pop')) pop.classList.remove('show');
-}
 
 /** valores/datas previstos pelo default para cada campo — exibidos como dica ao focar */
 function computeDefaultHints(){
@@ -1528,16 +1517,7 @@ function buildInvForm(){
     });
   });
 
-  wrap.querySelectorAll('input.money-mask[data-hinttype]').forEach(inp=>{
-    inp.addEventListener('focus', ()=>{
-      const hints = computeDefaultHints();
-      const h = hints[inp.dataset.path];
-      if(h && h.value){ showFieldHint(inp, fmtR(h.value)); }
-    });
-    inp.addEventListener('blur', ()=>hideFieldHint(inp));
-  });
-
-  wrap.querySelectorAll('.hint-btn[data-hinttype="date"]').forEach(btn=>{
+  wrap.querySelectorAll('.hint-btn').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       ev.preventDefault();
       const pop = btn.nextElementSibling;
@@ -1548,7 +1528,8 @@ function buildInvForm(){
       const hints = computeDefaultHints();
       const h = hints[btn.dataset.hintfor];
       if(h && h.value && pop){
-        pop.innerHTML = '<b>Previsto:</b> ' + h.value.toLocaleDateString('pt-BR');
+        const text = btn.dataset.hinttype==='date' ? h.value.toLocaleDateString('pt-BR') : fmtR(h.value);
+        pop.innerHTML = '<b>Previsto:</b> ' + text;
         pop.classList.add('show');
         btn.classList.add('active');
       }
