@@ -129,6 +129,10 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .entry-table input.e-desc{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
 .entry-table .e-empty{visibility:hidden;}
 .field-wrap{position:relative;}
+.date-wrap{display:flex;align-items:center;gap:4px;}
+.date-wrap input[type=date]{flex:1;min-width:0;}
+.hint-btn{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;font-style:italic;font-family:Georgia,serif;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
+.hint-btn.active{background:var(--accent);color:#fff;}
 .e-hint-pop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--accent);color:#fff;font-size:11px;line-height:1.3;border-radius:6px;padding:0 8px;max-height:0;opacity:0;overflow:hidden;transition:max-height .15s ease,opacity .15s ease,padding .15s ease;z-index:50;white-space:normal;box-shadow:0 3px 10px rgba(0,0,0,.18);}
 .e-hint-pop.show{max-height:44px;opacity:1;padding:6px 8px;}
 .e-hint-pop b{font-weight:700;}
@@ -168,8 +172,12 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
   .estudo-resumo-grid{grid-template-columns:1fr;}
   nav.tabs button{padding:8px 6px;font-size:12px;}
   .tir-line{flex-wrap:wrap;gap:10px 24px;}
-  header.app,main{padding-left:16px;padding-right:16px;}
+  header.app,main{padding-left:20px;padding-right:20px;}
   #prazos-tables > div{grid-template-columns:1fr !important;}
+  .brand{flex-direction:column;align-items:center;text-align:center;width:100%;}
+  .brand-logo-box{padding:8px 14px;}
+  .brand-logo{width:160px;}
+  .header-top-row{justify-content:center;}
 }
 </style>
 </head>
@@ -379,10 +387,10 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
       <button class="back-link" id="btn-voltar-investimentos">&larr; Voltar aos investimentos</button>
       <div class="panel">
         <h3 id="inv-nome" class="inv-nome-destaque"></h3>
+        <p style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;margin:0 0 8px;">Estudo de viabilidade (default)</p>
 
         <div class="phase-block" id="block-estudo" style="background:var(--bg);border-radius:var(--radius);padding:16px 18px;margin-bottom:22px;">
-          <div class="phase-head" style="margin-bottom:8px;">
-            <h3 style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);">Estudo de viabilidade (default)</h3>
+          <div class="phase-head" style="margin-bottom:8px;justify-content:flex-end;">
             <button class="phase-collapse-btn" id="btn-collapse-estudo">Minimizar</button>
           </div>
           <div id="estudo-resumo-body"></div>
@@ -1175,7 +1183,7 @@ function virtualDefaultInv(inv){
    alinhados sempre nas mesmas colunas (label | data | valor)
    ============================================================ */
 function row(label, datePath, valuePath, placeholder){
-  const dateCell = datePath ? `<div class="field-wrap"><input type="date" data-path="${datePath}" data-hinttype="date"><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
+  const dateCell = datePath ? `<div class="field-wrap date-wrap"><input type="date" data-path="${datePath}"><button type="button" class="hint-btn" data-hinttype="date" data-hintfor="${datePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
   const valCell = valuePath ? `<div class="field-wrap"><input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" data-hinttype="money" placeholder="${placeholder||''}"><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
   return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div>`;
 }
@@ -1520,15 +1528,31 @@ function buildInvForm(){
     });
   });
 
-  wrap.querySelectorAll('input[data-hinttype]').forEach(inp=>{
+  wrap.querySelectorAll('input.money-mask[data-hinttype]').forEach(inp=>{
     inp.addEventListener('focus', ()=>{
       const hints = computeDefaultHints();
       const h = hints[inp.dataset.path];
-      if(h && h.value){
-        showFieldHint(inp, inp.dataset.hinttype==='date' ? h.value.toLocaleDateString('pt-BR') : fmtR(h.value));
-      }
+      if(h && h.value){ showFieldHint(inp, fmtR(h.value)); }
     });
     inp.addEventListener('blur', ()=>hideFieldHint(inp));
+  });
+
+  wrap.querySelectorAll('.hint-btn[data-hinttype="date"]').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      const pop = btn.nextElementSibling;
+      const isShown = pop && pop.classList.contains('show');
+      wrap.querySelectorAll('.e-hint-pop.show').forEach(p=>p.classList.remove('show'));
+      wrap.querySelectorAll('.hint-btn.active').forEach(b=>b.classList.remove('active'));
+      if(isShown) return;
+      const hints = computeDefaultHints();
+      const h = hints[btn.dataset.hintfor];
+      if(h && h.value && pop){
+        pop.innerHTML = '<b>Previsto:</b> ' + h.value.toLocaleDateString('pt-BR');
+        pop.classList.add('show');
+        btn.classList.add('active');
+      }
+    });
   });
 
   document.getElementById('btn-add-liber').addEventListener('click', async ()=>{
