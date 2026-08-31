@@ -122,29 +122,28 @@ table.tir-matrix td.base::after{content:'default';position:absolute;bottom:2px;l
 .phase-block{margin-bottom:26px;}
 .phase-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .phase-head h3.phase-title{font-size:19px;font-weight:700;letter-spacing:.04em;font-family:'Inter',sans-serif;}
-.entry-table{display:grid;grid-template-columns:minmax(80px,1fr) minmax(0,0.55fr) minmax(0,1.35fr) 20px;row-gap:3px;column-gap:6px;align-items:center;max-width:100%;}
-.entry-table .e-label{font-size:12px;color:var(--ink-soft);padding:5px 0;}
-.entry-table input[type=date]{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
-.entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
-.entry-table input.e-desc{border:.5px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
-.entry-table .e-empty{visibility:hidden;}
-.field-wrap{position:relative;}
+.entry-table{display:flex;flex-direction:column;gap:10px;}
+.entry-field{width:100%;}
+.entry-field .e-label{font-size:12px;color:var(--ink-soft);margin:0 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;}
+.entry-field .e-data-row{display:flex;gap:8px;align-items:center;}
+.entry-table input[type=date]{border:.5px solid var(--line);border-radius:var(--radius-s);padding:7px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
+.entry-table input.money-mask{border:.5px solid var(--line);border-radius:var(--radius-s);padding:7px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;text-align:right;}
+.entry-table input.e-desc{border:.5px solid var(--line);border-radius:var(--radius-s);padding:7px 8px;font-size:12.5px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);width:100%;}
+.field-wrap{position:relative;flex:1;min-width:0;}
 .date-wrap{display:flex;align-items:center;gap:4px;}
 .date-wrap input[type=date],.date-wrap input.money-mask{flex:1;min-width:0;}
-.hint-btn{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;font-style:italic;font-family:Georgia,serif;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
+.hint-btn{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;font-style:italic;font-family:Georgia,serif;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
 .hint-btn.active{background:var(--accent);color:#fff;}
 .e-hint-pop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--accent);color:#fff;font-size:11px;line-height:1.3;border-radius:6px;padding:0 8px;max-height:0;opacity:0;overflow:hidden;transition:max-height .15s ease,opacity .15s ease,padding .15s ease;z-index:50;white-space:normal;box-shadow:0 3px 10px rgba(0,0,0,.18);}
 .e-hint-pop.show{max-height:44px;opacity:1;padding:6px 8px;}
 .e-hint-pop b{font-weight:700;}
-.entry-table .e-hint{font-size:11px;color:var(--accent);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !important;border-color:var(--warn) !important;font-weight:600;}
-.entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:15px;padding:2px 4px;}
-.despesas-block{grid-column:1/-1;margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-s);border:.5px dashed var(--line);}
+.entry-table .e-rm{border:none;background:none;color:var(--ink-soft);font-size:17px;padding:2px 8px;flex-shrink:0;}
+.despesas-block{margin:2px 0 8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-s);border:.5px dashed var(--line);}
 .despesas-block .desp-hdr{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;}
-.despesas-block .entry-table{grid-template-columns:minmax(70px,1fr) minmax(0,0.6fr) minmax(0,1.3fr) 20px;}
+.despesas-block .entry-table{gap:12px;}
 .phase-collapse-btn{border:.5px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:20px;font-size:11.5px;color:var(--ink-soft);}
 .phase-block.collapsed .phase-body{display:none;}
-@media (max-width:720px){ .entry-table .e-label{font-size:11px;} }
 .tir-line{display:flex;align-items:center;gap:24px;margin-bottom:22px;padding-bottom:16px;border-bottom:.5px solid var(--line);}
 .tir-line-item{display:flex;align-items:baseline;gap:8px;}
 .tir-line-lbl{font-size:12.5px;color:var(--ink-soft);}
@@ -425,7 +424,7 @@ input[data-path="compra.valorOrcamentoExecutivo"]{background:var(--warn-bg) !imp
 
         <div class="phase-block" style="background:var(--bg);border-radius:var(--radius);padding:16px 18px;margin-top:26px;">
           <p style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;">Resumo final do investimento</p>
-          <div id="resumo-final-body" class="row-3col" style="grid-template-columns:1fr 1fr 1fr;"></div>
+          <div id="resumo-final-body"></div>
         </div>
       </div>
     </div>
@@ -1231,9 +1230,9 @@ function virtualDefaultInv(inv){
    alinhados sempre nas mesmas colunas (label | data | valor)
    ============================================================ */
 function row(label, datePath, valuePath, placeholder){
-  const dateCell = datePath ? `<div class="field-wrap date-wrap"><input type="date" data-path="${datePath}"><button type="button" class="hint-btn" data-hinttype="date" data-hintfor="${datePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
-  const valCell = valuePath ? `<div class="field-wrap date-wrap"><input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" placeholder="${placeholder||''}"><button type="button" class="hint-btn" data-hinttype="money" data-hintfor="${valuePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : `<div class="e-empty"></div>`;
-  return `<div class="e-label">${label}</div>${dateCell}${valCell}<div class="e-empty"></div>`;
+  const dateCell = datePath ? `<div class="field-wrap date-wrap"><input type="date" data-path="${datePath}"><button type="button" class="hint-btn" data-hinttype="date" data-hintfor="${datePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : '';
+  const valCell = valuePath ? `<div class="field-wrap date-wrap"><input type="text" inputmode="decimal" class="money-mask" data-path="${valuePath}" placeholder="${placeholder||''}"><button type="button" class="hint-btn" data-hinttype="money" data-hintfor="${valuePath}" title="Ver previsto">i</button><div class="e-hint-pop"></div></div>` : '';
+  return `<div class="entry-field"><div class="e-label">${label}</div><div class="e-data-row">${dateCell}${valCell}</div></div>`;
 }
 function getPath(obj, path){ return path.split('.').reduce((o,k)=>(o? o[k] : undefined), obj); }
 function setPath(obj, path, val){ const ks=path.split('.'); let o=obj; for(let i=0;i<ks.length-1;i++){ if(!o[ks[i]]) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
@@ -1628,10 +1627,11 @@ function renderLiberRows(){
   const box = document.getElementById('liber-rows');
   box.innerHTML='';
   (currentInv.obra.liberacoes||[]).forEach((l,i)=>{
-    box.innerHTML += `<div class="e-empty"></div>
-      <input type="date" value="${l.data||''}" data-li="${i}" data-f="data">
-      <input type="text" inputmode="decimal" class="money-mask" value="${l.valor?Math.round(l.valor).toLocaleString('pt-BR'):''}" placeholder="R$" data-li="${i}" data-f="valor">
-      <button class="e-rm" data-rm="${i}" type="button" title="Remover">&times;</button>`;
+    box.innerHTML += `<div class="entry-field"><div class="e-data-row">
+      <input type="date" value="${l.data||''}" data-li="${i}" data-f="data" style="flex:1;">
+      <input type="text" inputmode="decimal" class="money-mask" value="${l.valor?Math.round(l.valor).toLocaleString('pt-BR'):''}" placeholder="R$" data-li="${i}" data-f="valor" style="flex:1;">
+      <button class="e-rm" data-rm="${i}" type="button" title="Remover">&times;</button>
+    </div></div>`;
   });
   box.querySelectorAll('input[type=date][data-li]').forEach(inp=>{
     inp.addEventListener('change', async ()=>{
@@ -1666,10 +1666,14 @@ function renderDespesasRows(){
   if(!box) return;
   box.innerHTML='';
   (currentInv.compra.outrasDespesas||[]).forEach((d,i)=>{
-    box.innerHTML += `<input type="text" class="e-desc" placeholder="Descrição" value="${d.descricao||''}" data-di="${i}" data-f="descricao">
-      <input type="date" value="${d.data||''}" data-di="${i}" data-f="data">
-      <input type="text" inputmode="decimal" class="money-mask" value="${d.valor?Math.round(d.valor).toLocaleString('pt-BR'):''}" placeholder="R$" data-di="${i}" data-f="valor">
-      <button class="e-rm" data-rmd="${i}" type="button" title="Remover">&times;</button>`;
+    box.innerHTML += `<div class="entry-field">
+      <input type="text" class="e-desc" placeholder="Descrição" value="${d.descricao||''}" data-di="${i}" data-f="descricao" style="margin-bottom:4px;">
+      <div class="e-data-row">
+        <input type="date" value="${d.data||''}" data-di="${i}" data-f="data" style="flex:1;">
+        <input type="text" inputmode="decimal" class="money-mask" value="${d.valor?Math.round(d.valor).toLocaleString('pt-BR'):''}" placeholder="R$" data-di="${i}" data-f="valor" style="flex:1;">
+        <button class="e-rm" data-rmd="${i}" type="button" title="Remover">&times;</button>
+      </div>
+    </div>`;
   });
   box.querySelectorAll('input.e-desc[data-di]').forEach(inp=>{
     inp.addEventListener('change', async ()=>{
@@ -1717,6 +1721,11 @@ function updateInvPresente(){
 
 function renderResumoFinal(lines, ded, dates, tir, hasReal){
   const inv = currentInv;
+  const body = document.getElementById('resumo-final-body');
+  if(!hasReal){
+    body.innerHTML = `<p style="font-size:12.5px;color:var(--ink-faint);margin:0;grid-column:1/-1;">Nenhum dado real lançado ainda — este resumo aparece assim que o acompanhamento do investimento começar.</p>`;
+    return;
+  }
   const totalInvestido = -lines.filter(l=>l.amt<0 && !l.label.startsWith('Pgto ')).reduce((s,l)=>s+l.amt,0);
   const totalRecebidoLiquido = lines.filter(l=>l.label.startsWith('Recebimento')).reduce((s,l)=>s+l.amt,0)
     + lines.filter(l=>l.label.startsWith('Pgto ')).reduce((s,l)=>s+l.amt,0);
@@ -1733,13 +1742,13 @@ function renderResumoFinal(lines, ded, dates, tir, hasReal){
     ['Valor real da venda', fmtR(vendaValReal)],
     ['Valor real da reforma', fmtR(reformaValReal)],
     ['Bônus', fmtR(ded.bonus)],
-    ['TIR real', hasReal?fmtPct(tir):'—'],
+    ['TIR real', fmtPct(tir)],
     ['Valor total investido', fmtR(totalInvestido)],
     ['Lucro final em R$', fmtR(lucro)]
   ];
-  document.getElementById('resumo-final-body').innerHTML = campos.map(([label,val])=>
-    `<div><label class="field">${label}</label><input type="text" readonly value="${val}"></div>`
-  ).join('');
+  body.innerHTML = `<table style="width:100%;border-collapse:collapse;">${campos.map(([label,val])=>
+    `<tr><td style="padding:6px 10px 6px 0;font-size:12.5px;color:var(--ink-soft);white-space:nowrap;">${label}</td><td style="padding:6px 0;font-size:13.5px;font-weight:600;text-align:right;">${val}</td></tr>`
+  ).join('')}</table>`;
 }
 
 /* ============================================================
